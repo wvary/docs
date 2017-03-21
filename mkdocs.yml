@@ -7,6 +7,8 @@ pages:
 - Demos:
     - Running Apps: demos.md
 - Sandbox: sandbox.md
+- Cloud Trial:
+    - AWS: aws_emr_manual.md
 - Development:
     - Creating Applications: create.md
     - "Beginner's Guide": beginner.md
