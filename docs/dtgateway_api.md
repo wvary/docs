@@ -1314,9 +1314,9 @@ Return:
 
 ### POST /ws/v2/licenses
 
-Function: Add a license to the registry or generate an eval license
+Function: Add a license to the registry
 
-Payload: The license file content, if payload is empty, it will try to generate an eval license and return the info
+Payload: The license file content
 
 Return:
 
@@ -1324,8 +1324,10 @@ Return:
 {
   "id": "{licenseId}",
   "expireTime": {unixTimeMillis},
+  "expirationTimeNotificationPeriod": {timeMillis},
   "nodesAllowed": {nodesAllowed},
   "memoryMBAllowed": {memoryMBAllowed},
+  "exceedGracePeriod": {timeMillis},
   "contextType": "{contextType}",
   "type": "{type}",
   "features": [ "{feature1}", … ]
@@ -1339,15 +1341,21 @@ Function: Get info on the current license
 ```json
 {
       "id": "{licenseId}",
+      "currentTime": {unixTimeMillis},
       "expireTime": {unixTimeMillis},
       "nodesAllowed": {nodesAllowed},
       "nodesUsed": {nodesUsed},
       "memoryMBAllowed": {memoryMBAllowed},
       "memoryMBUsed": {memoryMBUsed},
+      "exceedGracePeriod": {timeMillis}, // memory exceed grace period
+      "exceedRemainingTime": {timeMillis},  // (optional)
+      "violation": "memory", // returns violation type (optional)
       "contextType": "{community|standard|enterprise}",
       "type": "{evaluation|non_production|production}"
       "features": [ "{feature1}", … ], // for community, empty array
-      "current": true/false
+      "current": true/false,
+      "expirationTimeNotificationLevel": "{INFO|WARN|ERROR}", // (optional)
+      "valid": true/false // true, if the license is valid
 }
 ```
 
@@ -2138,6 +2146,84 @@ Return:
 ```json
 {
      "{topicName}": {json object data}, ...
+}
+```
+
+### PUT /ws/v2/systemAlerts/templates/system/"{name}"
+
+Function: Creates or replaces the specified system alert template.
+
+Payload:
+
+```json
+{
+    "isSystemTemplate": true,
+    "description": "{description}",
+    "parameters": [
+
+        *** this session will be provided by Willet Vary
+
+    ],
+    "script": {"script"}
+}
+```
+
+### DELETE /ws/v2/systemAlerts/templates/system/"{name}"
+
+Function: Deletes the specified system alert template.
+
+### GET /ws/v2/systemAlerts/templates/system
+
+Function: Gets the created system alert templates
+
+Return:
+
+```json
+{
+    "templates": [
+        {
+            "isSystemTemplate": true,
+            "description": "{description}",
+            "parameters": [
+
+                *** this session will be provided by Willet Vary
+
+            ],
+            "script": {"script"}
+        },
+        …
+    ]
+}
+```
+
+### GET /ws/v2/systemAlerts/templates/system/"{name}"
+
+Function: Gets the specified system alert template
+
+Return:
+
+```json
+{
+    "isSystemTemplate": true,
+    "description": "{description}",
+    "parameters": [
+
+      *** this session will be provided by Willet Vary
+
+    ],
+    "script": {"script"}
+}
+```
+
+### PUT /ws/v2/systemAlerts/validate/script
+
+Function: Validates Java script.
+
+Payload:
+
+```json
+{
+    "script": {"script"}
 }
 ```
 
