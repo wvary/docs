@@ -2149,7 +2149,7 @@ Return:
 }
 ```
 
-### PUT /ws/v2/systemAlerts/templates/system/"{name}"
+### PUT /ws/v2/systemAlerts/templates/system/{name}
 
 Function: Creates or replaces the specified system alert template.
 
@@ -2160,15 +2160,66 @@ Payload:
     "isSystemTemplate": true,
     "description": "{description}",
     "parameters": [
-
-        *** this session will be provided by Willet Vary
-
+        {
+          "variable": "{replacement variable in Javascript block}",
+          "label": "{input label}",
+          "type": "{number/text}",
+          "placeholder": "{input placeholder}",
+          "tooltip": "{input tooltip}",
+          "required": {true/false},
+          "default": "{default value}",     // optional
+          "values": {                       // optional
+            "{key}": "{value}",
+            …
+          }
+        },
+        …
     ],
-    "script": {"script"}
+    "script": "{Javascript block}"
 }
 ```
 
-### DELETE /ws/v2/systemAlerts/templates/system/"{name}"
+Example:
+
+```json
+{
+    "templates": [
+        {
+            "isSystemTemplate": true,
+            "description": "An alert template example.",
+            "parameters": [
+                {
+                  "variable": "comparison",
+                  "label": "Comparison",
+                  "type": "text",
+                  "placeholder": "Select a comparison",
+                  "tooltip": "Choose the comparison to use.",
+                  "required": true,
+                  "default": ">",
+                  "values": {
+                    "<": "less than",
+                    "===": "equals to",
+                    ">": "greater than"
+                  }
+                },
+                {
+                  "variable": "count",
+                  "label": "Number of Killed Containers",
+                  "type": "number",
+                  "placeholder": "Enter a valid number",
+                  "tooltip": "Enter the number.",
+                  "required": false
+                }
+            ],
+            "script": "/* Alert when number of killed containers is {{comparison}} {{count}} */
+
+                _topic['cluster.metrics'].numContainers {{comparison.key}} ({{count}} !== null ? {{count}} : 0);"
+        }
+    ]
+}
+```
+
+### DELETE /ws/v2/systemAlerts/templates/system/{name}
 
 Function: Deletes the specified system alert template.
 
@@ -2185,18 +2236,29 @@ Return:
             "isSystemTemplate": true,
             "description": "{description}",
             "parameters": [
-
-                *** this session will be provided by Willet Vary
-
+                {
+                  "variable": "{replacement variable in Javascript block}",
+                  "label": "{input label}",
+                  "type": "{number/text}",
+                  "placeholder": "{input placeholder}",
+                  "tooltip": "{input tooltip}",
+                  "required": {true/false},
+                  "default": "{default value}",     // optional
+                  "values": {                       // optional
+                    "{key}": "{value}",
+                    …
+                  }
+                },
+                …
             ],
-            "script": {"script"}
+            "script": "{Javascript block}"
         },
         …
     ]
 }
 ```
 
-### GET /ws/v2/systemAlerts/templates/system/"{name}"
+### GET /ws/v2/systemAlerts/templates/system/{name}
 
 Function: Gets the specified system alert template
 
@@ -2207,11 +2269,22 @@ Return:
     "isSystemTemplate": true,
     "description": "{description}",
     "parameters": [
-
-      *** this session will be provided by Willet Vary
-
+        {
+          "variable": "{replacement variable in Javascript block}",
+          "label": "{input label}",
+          "type": "{number/text}",
+          "placeholder": "{input placeholder}",
+          "tooltip": "{input tooltip}",
+          "required": {true/false},
+          "default": "{default value}",     // optional
+          "values": {                       // optional
+            "{key}": "{value}",
+            …
+          }
+        },
+        …
     ],
-    "script": {"script"}
+    "script": "{Javascript block}"
 }
 ```
 
