@@ -307,29 +307,29 @@ The following settings may be controlled by the Control Widget:
     + Field to use as quantity
     + Sort order
 
-For more information on each setting options, see the [Editing Widgets](#editing-widgets) section above.
-
 ### Adding Control Widget
 
-Control Widget can be added just like any other widget.  See the [Adding Widgets](#adding-widgets) section above. 
+Control Widget can be added just like any other widget.  See the [Adding Widgets](#adding-widgets) section for more details.
 
 ### Adding Widgets to Control
 
-Click the edit button to show the available widgets to control.  Only applicable widgets are shown in the table.
+Click the edit button on the Control Widget to show the available widgets to control, and change the controllable widget selections.
+
+![mixedSchemaTypesError.png](images/dtdashboard/image30.png)
+
 
 The Cotnrol Widget does not allow selection of dimensional and snapshot schema widgets together. If users happen to choose widgets with both schema types, then the "OK" button remains disabled until only one schema type is selected.
 
-![mixedSchemaTypesError.png](images/dtdashboard/image30.png)
 
 The control widget allows selection of widgets with different data sources. Users are warned that some setting sections in the control widget may be disabled if the schemas are incompatible.
 
 ![mixedDataSourcesWarning.png](images/dtdashboard/image31.png)
 
-When widgets to be controlled have incompatible schemas, the applicable sections remain disabled until the widgets are removed in the control widget settings. This issue can also be resolved if the widgets with incompatible schemas are removed from the dashboard.
+When widgets to be controlled have incompatible schemas, the incompatible sections remain disabled until mismatched widgets are removed in the control widget settings.  This issue can also be resolved if the widgets with incompatible schemas are removed from the dashboard.
 
 ![incompatibleDataSource.png](images/dtdashboard/image32.png)
 
-### Changing Widget Settings
+### Examples of Control Widget in Action
 
 Changing the time range selection for the line and stacked area charts.
 
