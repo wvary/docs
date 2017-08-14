@@ -271,6 +271,86 @@ For Notes widget, a text in Markdown format can be entered and should be transla
 After making the widget settings changes, remember to use **save** button to persist the desired results.  If the resulting changes should not be saved, using the **discard** button will revert it to the the original state.
 
 
+## Control Widget
+
+Control widget can be used to configure settings of one or more widgets on the dashboard.  This is a convenient way to configure multiple widgets settings in one place.  It is also the only way to change widgets settings in presentation mode.  However, settings changes in presentation mode will not be saved.
+
+### Controllable Widgets
+
+The following widgets may be controlled by the Control Widget:
+
++ Dimensions Schema Data Source Widgets
+    + Geo Choropleth
+    + Geo Circles
+    + Line Chart
+    + Multi Bar Chart
+    + Stacked Area Chart
++ Snapshot Schema Data Source Widgets
+    + Bar Chart
+    + Horizontal Bar Chart
+    + Multi Color Bar Chart
+    + Pie Chart
+
+### Controllable Settings
+
+The following settings may be controlled by the Control Widget:
+
++ Dimensions Schema Data Source Settings
+    + Circle Size *(Geo Circle widget only)*
+    + Color Intensity *(Geo Choropleth widget only)*
+    + Geo Coordinates *(Geo Circle widget only)*
+    + Keys Combinations and Aggregates
+    + Time Range Selection
+    + Tooltip Values *(Geo Choropleth and Circle widgets only)*
++ Snapshot Schema Data Source Settings
+    + Field to use as label
+    + Field to use as quantity
+    + Sort order
+
+For more information on each setting options, see the [Editing Widgets](#editing-widgets) section above.
+
+### Adding Control Widget
+
+Control Widget can be added just like any other widget.  See the [Adding Widgets](#adding-widgets) section above. 
+
+### Adding Widgets to Control
+
+Click the edit button to show the available widgets to control.  Only applicable widgets are shown in the table.
+
+The Cotnrol Widget does not allow selection of dimensional and snapshot schema widgets together. If users happen to choose widgets with both schema types, then the "OK" button remains disabled until only one schema type is selected.
+
+![mixedSchemaTypesError.png](images/dtdashboard/image30.png)
+
+The control widget allows selection of widgets with different data sources. Users are warned that some setting sections in the control widget may be disabled if the schemas are incompatible.
+
+![mixedDataSourcesWarning.png](images/dtdashboard/image31.png)
+
+When widgets to be controlled have incompatible schemas, the applicable sections remain disabled until the widgets are removed in the control widget settings. This issue can also be resolved if the widgets with incompatible schemas are removed from the dashboard.
+
+![incompatibleDataSource.png](images/dtdashboard/image32.png)
+
+### Changing Widget Settings
+
+Changing the time range selection for the line and stacked area charts.
+
+![addingControlWidget.gif](images/dtdashboard/image33.gif)
+
+Changing dimensional keys and aggregates.
+
+![changingKeysAndAggregates.gif](images/dtdashboard/image34.gif)
+
+Changing the sorting option.
+
+![changingSortingOrder.gif](images/dtdashboard/image35.gif)
+
+Changing the geo circle settings.
+
+![changingGeoCircleSettings.gif](images/dtdashboard/image36.gif)
+
+Changing the geo choropleth settings in presentation mode.
+
+![changingSettingsInPresentationMode.gif](images/dtdashboard/image37.gif)
+
 ## Presentation Mode
 
 Dashboards can be viewed in a fullscreen mode with main navigation elements removed.
