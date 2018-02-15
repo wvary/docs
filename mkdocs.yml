@@ -82,6 +82,7 @@ pages:
     - dtDashboard: dtdashboard.md
     - dtGateway: dtgateway.md
     - Services: services.md
+    - JAR Artifacts: jar_artifacts.md
     - Alerts: dtgateway_systemalerts.md
     - Apache Apex: apex.md
     - Apache Apex-Malhar: apex_malhar.md
