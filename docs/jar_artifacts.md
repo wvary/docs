@@ -88,3 +88,20 @@ Below are the descriptions of the fields shown on the dialog:
 After uploading a JAR file, the Gateway processes it and shows the information gathers from the JAR file.  You can process a different JAR file by dragging another JAR file into the top section of the dialog.  Alternatively, you can click on the down chevron button to expand that section and click on the **Choose another file** button.
 
 If you are loading a JAR file that already exists in the artifacts global space, you can overwrite the existing JAR file by clicking on the **Replace** button on the dialog.
+
+#### Synchronizing JAR Files
+
+In addition to uploading JAR files and creating new schemas manually, you can write JAR files directly to the local file system designated as artifacts directories and the Gateway would process these JAR files and write them to HDFS.  You must configure the `dt.gateway.maven.local.repo` property in the `dt-site.xml` file in order for this synchronization process to work.
+
+To configure the Gateway to synchronize JAR files on the local file system with HDFS, follow the steps below:
+
+1. Add the XML below to the **dt-site.xml** file.
+    <pre><code class="hljs gherkin">&lt;property&gt;<br/>  &lt;name&gt;dt.gateway.maven.local.repo&lt;/name&gt;</br>  &lt;value&gt;_path-where-artifacts-are-stored-on-the-local-file-system_&lt;/value&gt;</br>&lt;/property&gt;</code></pre>
+2. Restart the Gateway if necessary.
+
+Sample XML to synchronize JAR files:
+
+<pre><code class="hljs gherkin">&lt;property&gt;<br/>  &lt;name&gt;dt.gateway.maven.local.repo&lt;/name&gt;</br>  &lt;value&gt;/Users/willet/.dt/artifacts&lt;/value&gt;</br>&lt;/property&gt;
+</code></pre>
+
+The example above designates the directory named `/Users/willet/.dt/artifacts` on the local file system as the home directory where all JAR artifacts are stored.  This value varies from installation to installation.
