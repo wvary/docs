@@ -2,7 +2,7 @@
 
 Artifacts can be used to provide libraries, rules, schemas, and custom code to applications.  JAR artifacts follow Apache Maven standards which require groupId, artifactId and version to be specified.  JAR files can be uploaded manually and synchronized automatically from a Maven artifacts directory accessible by the Gateway.  Users can also build new JAR files by creating new schemas using the **New Schema** dialog in the DT RTS Console.  Once the JAR artifacts are added to the DT RTS system, Apex applications can reference them in the [Application Configuration](/application_configurations/) page.
 
-#### View Artifacts
+#### Viewing Artifacts
 
 Artifacts can be view and managed on the **JAR Artifacts** page in the DT RTS Console.  There you can create new schemas and upload JAR files.
 
@@ -15,7 +15,7 @@ Sample JAR artifacts list:
 
 ![](/images/jar_artifacts/artifacts-list.png)
 
-#### Search and Filters
+#### Searching and Filtering
 
 The search field in the upper right side of the page performs generic search across all fields shown in the table.  However, each column has its own filtering option where the filter is performed on that field only.  As you enter the search string and column filters, the values are added to the URL parameters.  You can bookmark or send this URL to another user.
 
@@ -32,7 +32,7 @@ To change the artifacts per page, follow the steps below:
 1. On the **JAR Artifacts** page, click the artifacts count above the artifacts table.  The dropdown menu is shown.
 2. Click the desired _items per page_ menu item.  The table should refresh with the selected artifacts per page.  The selected artifacts per page should also be added to the URL parameters.  This parameter name for this value is `limit`.
 
-#### Create New Schema
+#### Creating New Schema
 
 Schemas can be pre-built as JAR files and upload into DT RTS or created manually using the **New Schema** dialog in the DT RTS Console.  When creating a new schema, the Gateway builds the schema as a JAR file.  This schema is then stored in the artifacts global space in DT RTS.  The file name and directory structure follows the Maven directory layout and file name standards.  This dialog can also be launched on the [Application Configuration](/application_configurations/) page. 
 
@@ -56,7 +56,7 @@ The following entries are shown on the **New Schema** dialog:
 
 **Note**: If you enter the Group ID, Artifact ID and Version that match an existing schema or JAR artifact, you must change one of the fields in order to create the new schema.
 
-#### Upload JAR File
+#### Uploading JAR File
 
 JAR files can be uploaded into the artifacts global space using the DT RTS Console.  When uploading JAR files, the Gateway searches for a pom.xml file in the JAR file to determine the group ID, artifact ID and version for the JAR file.  If the JAR file does not have a pom.xml file, then users can enter the group ID, artifact ID and version in the upload dialog and save the JAR file.  If users have to enter the group ID, artifact ID and version, then the Gateway will create an pom.xml file containing this information and store it in the uploaded JAR file.
 
