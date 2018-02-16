@@ -98,11 +98,12 @@ To configure the Gateway to synchronize JAR files on the local file system with 
 
 1. Add the XML below to the **dt-site.xml** file.
     <pre><code class="hljs gherkin">&lt;property&gt;<br/>  &lt;name&gt;dt.gateway.maven.local.repo&lt;/name&gt;</br>  &lt;value&gt;_path-where-artifacts-are-stored-on-the-local-file-system_&lt;/value&gt;</br>&lt;/property&gt;</code></pre>
-2. Restart the Gateway if necessary.
+2. Restart the Gateway.
 
-Sample XML to synchronize JAR files:
+Sample XML to configure JAR files synchronization:
 
-<pre><code class="hljs gherkin">&lt;property&gt;<br/>  &lt;name&gt;dt.gateway.maven.local.repo&lt;/name&gt;</br>  &lt;value&gt;/Users/willet/.dt/artifacts&lt;/value&gt;</br>&lt;/property&gt;
+<pre><code class="hljs gherkin">
+&lt;property&gt;<br/>  &lt;name&gt;dt.gateway.maven.local.repo&lt;/name&gt;</br>  &lt;value&gt;/Users/willet/.dt/artifacts&lt;/value&gt;</br>&lt;/property&gt;
 </code></pre>
 
 The example above designates the directory named `/Users/willet/.dt/artifacts` on the local file system as the home directory where all the JAR artifacts are stored.  This value varies from installation to installation.
