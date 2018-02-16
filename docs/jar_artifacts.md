@@ -54,7 +54,7 @@ The following entries are shown on the **New Schema** dialog:
 | Version | The schema version.  The schema is built and packaged as a JAR file and this value is used as part of the file name.<br/>For example: `1.0.0`, `1.0.1`, etc.  |
 | Schema Content | A JSON object structure representing the schema definition.  This JSON structure must comply with the [Apache Avro](http://avro.apache.org/docs/current/spec.html#schemas) specification.  You can click on the AVRO link on the dialog to open the Apache Avro schema documentation page in a new browser tab for reference.<br/>Example of an Avro JSON:<pre><code>{<br/>  "type": "enum",<br/>  "name": "states",<br/>  "symbols": ["CA", "MA", "NV", "NY", "TX"]<br/>}</code></pre> |
 
-**Note**: If you enter the Group ID, Artifact ID and Version that match an existing schema or JAR artifact, you must change one of the fields in order to create the new schema.
+**Note**: If you enter the Group ID, Artifact ID and Version that match an existing schema or JAR artifact, you will see an error message stating that an artifact with the entered Group ID, Artifact ID and Version already exists.  The **Save** button will be disabled until you change one of the fields.
 
 #### Uploading JAR File
 
