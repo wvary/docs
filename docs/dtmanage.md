@@ -327,9 +327,9 @@ By default, your installation starts with no security enabled, which may be suff
 DataTorrent RTS supports various authentication methods which can be enabled by following instructions in the [Authentication](dtgateway_security/#authentication) section.
 
 ### Services
-Services represent global, shared, and automatically managed Docker or Apex processes. Applications are dependent on such services. From the Service page,  you can create new services, import packaged services, or manage installed services.
+Services represent global, shared, and automatically managed processes. These processes are automatically installed, managed, and monitored by the Gateway, and can be an instance of an Apex application or a Docker container. Applications can rely on any number of services as their dependencies, and all the required services will be automatically installed and launched as needed when the application starts.  For more details refer to the [Services](/services) section.
 
-![Security Configuration Page](images/dtmanage/security-screen1.png)
+![Services](images/services/services-list.png)
 
 ### Alerts
 
@@ -402,7 +402,7 @@ Use this page to manage users and their corresponding roles on your DataTorrent 
 *   Edit role permissions
 *   Delete roles
 
-![User Management Screen](images/dtmanage/console-user-mgmt.png
+![User Management Screen](images/dtmanage/console-user-mgmt.png)
 
 > **Note:** With most authentication schemes, the admin role cannot be deleted.
 
@@ -412,12 +412,13 @@ The first time you open the Console, after installing DataTorrent RTS on your cl
 
 * Location of the Hadoop executable
 * DFS location where all the DataTorrent files are stored
+* Docker configuration
 * DataTorrent license
 * Summary and review of any remaining configuration items
 
 At any time, you can go back to the installation wizard from the Configuration Tab. It can help diagnose issues and reconfigure your cluster and gateway.
 
-![](images/dtmanage/hadoop-config-screenshot.png)
+![](images/dtmanage/config-screenshot.png)
 
 When your Hadoop cluster has security enabled with Kerberos, there will be four additional controls in the installation wizard: 
 
@@ -429,6 +430,4 @@ When your Hadoop cluster has security enabled with Kerberos, there will be four 
 
 > **Note:** The token lifetime values you enter will not actually set these values in your hadoop configuration, it is only meant to inform the DataTorrent platform of these values.
 
-
-
-
+Docker configuration is optional.  For more details, refer to the [Docker Configuration](/services/#configuring-docker) section.
