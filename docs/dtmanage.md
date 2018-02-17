@@ -82,7 +82,17 @@ The Cluster Overview page shows overall cluster statistics as well as a list of 
 
 ![Cluster Overview Page](images/dtmanage/console-monitor-home.png)
 
-The cluster statistics include some performance statistics and memory usage information. As for the application list, take note of: **ended apps** This includes all the ended applications that are still in the resource manager history.
+The operations home page shows overall cluster statistics as well as a list of running DataTorrent applications.
+
+![Operations Home Page](images/dtmanage/console-monitor-home.png)
+
+The cluster statistics include some performance statistics and memory usage information. Each column has a
+"Quick Find" box just below the header which is useful for locating specific rows where there are a large
+number of applications running: Enter a few characters here to select only the rows containing those
+characters. You can also click on any column header to sort the rows by that column value. Clicking on a
+specific application id or name will take you to the instance page for that application (see below).
+
+As for the application list, there are two options to take note of: **ended apps** and **system apps**. The first option will include all ended applications that are still in the resource manager history. The second option will include system apps, which are apps like the App Data Tracker that are developed by DataTorrent and used to add functionality to your DataTorrent cluster.
 
 ### Instance Page
 
@@ -103,6 +113,9 @@ All the default dashboard tabs have this widget. It contains basic information r
 ![shutdown and kill buttons](images/dtmanage/console-instance-kill-shutdown.png)
 
 The “shutdown” function tries to gracefully stop the application, while “kill” forces the application to end. In either case, you will need to confirm your action.
+
+The "AM logs" button shows you a dropdown where you can view the App Master logs; often, application errors
+or other anomalies will be reflected in these logs in some way.
 
 You can also use the **set logging level** button on this widget to specify what logging level gets written to the dt.log files. 
 
@@ -129,7 +142,22 @@ This widget visualizes the logical plan of the application being viewed:
 
 ![](images/dtmanage/logical-dag.png)
 
-Additionally, you can cycle through various metrics aggregated by logical operator. In the screenshot above, processed tuples per second and emitted tuples per second are shown. 
+Additionally, by selecting alternatives from the "Top" and "Bottom" dropdowns, you can cycle through
+various metrics aggregated by the logical operators. In the screenshot above, processed tuples per
+second and emitted tuples per second are shown.
+
+The rectangle near the bottom right with a miniature representation of the DAG is a scrolling aid and
+is useful when the DAG is very large and does not fit in its entirety in the browser window: You can
+pan (i.e. shift the viewport) to a particular area of the DAG by moving the grey box with your pointer
+to the corresponding area of the mini-DAG.
+
+Clicking on the "Critical Path" checkbox, you can enable highlighting of the path of the longest
+latencies highlighted in red:
+
+![](images/dtmanage/CriticalPath.png)
+
+Similarly, clicking on the "Stream Locality" checkbox will draw the streams with different dot patterns
+to distinguish the different localities chosen.
 
 >**Pro tip:** Hold the alt/option key while using your mouse scroll wheel to zoom in and out on the DAG.
 
@@ -151,11 +179,24 @@ One nice feature specific to this widget is the ability to set the logging level
 
 #### Physical Operators List Widget
 
-Shows the physical operators in the application.
+Shows the physical operators in the application and, for each operator, also shows the container
+running it. The value in the "container" column is a clickable link which takes you to the page
+for that container. The same link is also present in the "id" column of the "Containers" widget
+described next.
 
 #### Containers List Widget
 
-Shows the containers in the application. From this widget you can: select a container and go to one of its logs, fetch non-running containers and view information about them, and even kill selected containers.
+Shows the containers in the application. Selecting a container by clicking on the checkbox
+will trigger the display of additinal buttons which allow you to retrieve logs, fetch info for
+containers that have already terminated, retrieve a stack dump, or kill selected containers:
+
+![](images/dtmanage/ContainerButtons.png)
+
+The operator whose id is 1 is the Application Master and has a marker button next to it as shown
+in the above screenshot. The entries in the id column are clickable links that take you to the
+page for a specific container, showing the physical operators hosted in it and relevant statistics:
+
+![](images/dtmanage/PhysicalOperators.png)
 
 #### Logical Streams List Widget
 
