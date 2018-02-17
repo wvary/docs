@@ -82,11 +82,7 @@ The operations home page shows overall cluster statistics as well as a list of r
 
 ![Operations Home Page](images/dtmanage/console-monitor-home.png)
 
-The cluster statistics include some performance statistics and memory usage information. Each column has a
-"Quick Find" box just below the header which is useful for locating specific rows where there are a large
-number of applications running: Enter a few characters here to select only the rows containing those
-characters. You can also click on any column header to sort the rows by that column value. Clicking on a
-specific application id or name will take you to the instance page for that application (see below).
+The cluster statistics include performance statistics and memory usage information.  Below is a list of running applications.  In this list each column has a filter input just below the header which is useful for locating specific applications when there is a large number of applications running.  Clicking on individual column headers will sort the rows by that column value.  Clicking on a specific application id or name will take you to the instance page for that application (see below).
 
 Selecting the **ended apps** button will include all ended applications that are still in the resource manager history.
 
@@ -112,7 +108,7 @@ All the default dashboard tabs have this widget. It contains basic information r
 
 The “shutdown” function tries to gracefully stop the application, while “kill” forces the application to end. In either case, you will need to confirm your action.
 
-**Note**: You should not shutdown or kill an Apex application which is running as a service.  If you want to terminate such an application, then you should stop or delete the service.  For more details on stopping and deleting services, refer to the [Services](/services) section. 
+**Note**: You should not shutdown or kill an Apex application which is running as a service.  If you want to terminate such an application, then you should stop or delete the service.  For more details on stopping and deleting services, refer to the [Services](services.md) section. 
 
 The "AM logs" button shows you a dropdown where you can view the App Master logs; often, application errors
 or other anomalies will be reflected in these logs in some way.
@@ -192,9 +188,9 @@ containers that have already terminated, retrieve a stack dump, or kill selected
 
 ![](images/dtmanage/ContainerButtons.png)
 
-The operator whose id is 1 is the Application Master and has a marker button next to it as shown
+The first container in the list is typically the one with Application Master in it and has a corresponding label next to it as shown
 in the above screenshot. The entries in the id column are clickable links that take you to the
-page for a specific container, showing the physical operators hosted in it and relevant statistics:
+page for a specific container, showing the physical operators hosted in it and the relevant statistics:
 
 ![](images/dtmanage/PhysicalOperators.png)
 
