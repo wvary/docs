@@ -92,7 +92,7 @@ number of applications running: Enter a few characters here to select only the r
 characters. You can also click on any column header to sort the rows by that column value. Clicking on a
 specific application id or name will take you to the instance page for that application (see below).
 
-As for the application list, there are two options to take note of: **ended apps** and **system apps**. The first option will include all ended applications that are still in the resource manager history. The second option will include system apps, which are apps like the App Data Tracker that are developed by DataTorrent and used to add functionality to your DataTorrent cluster.
+As for the application list, there are two options to take note of: **ended apps** and **service apps**. The **ended apps** button will include all ended applications that are still in the resource manager history.
 
 ### Instance Page
 
