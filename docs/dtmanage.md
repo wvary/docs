@@ -78,10 +78,6 @@ The Monitor section of the Console can be used to monitor, troubleshoot, and man
 
 ### Cluster Overview
 
-The Cluster Overview page shows overall cluster statistics as well as a list of running DataTorrent applications.
-
-![Cluster Overview Page](images/dtmanage/console-monitor-home.png)
-
 The operations home page shows overall cluster statistics as well as a list of running DataTorrent applications.
 
 ![Operations Home Page](images/dtmanage/console-monitor-home.png)
@@ -93,6 +89,8 @@ characters. You can also click on any column header to sort the rows by that col
 specific application id or name will take you to the instance page for that application (see below).
 
 Selecting the **ended apps** button will include all ended applications that are still in the resource manager history.
+
+Notice the **services** designation on the _ato-online-analytics-service_ and _fpa-online-analytics-service_ applications in the image above.  These are Apex applications running as services.  For more details on services, refer to the [Services](/services) section.
 
 ### Instance Page
 
@@ -113,6 +111,8 @@ All the default dashboard tabs have this widget. It contains basic information r
 ![shutdown and kill buttons](images/dtmanage/console-instance-kill-shutdown.png)
 
 The “shutdown” function tries to gracefully stop the application, while “kill” forces the application to end. In either case, you will need to confirm your action.
+
+**Note**: You should not shutdown or kill an Apex application which is running as a service.  If you want to terminate such an application, then you should stop or delete the service.  For more details on stopping and deleting services, refer to the [Services](/services) section. 
 
 The "AM logs" button shows you a dropdown where you can view the App Master logs; often, application errors
 or other anomalies will be reflected in these logs in some way.
