@@ -291,7 +291,7 @@ All DataTorrent applications are made up of operators that connect together via 
 
 ## Configure
 
-The RTS configuration menu is accessed by the cog button on the top-right corner of the Console. Under the **configuration** section, there are links to various tools to help you configure and troubleshoot your DataTorrent installation. The available menu items may differ depending on your security settings.
+The RTS configuration menu is accessed by the cog button on the top-right corner of the Console. Under the **System Configuration** section, there are links to various tools to help you configure and troubleshoot your DataTorrent installation. The available menu items may differ depending on your security settings.
 
 ![](images/dtmanage/console-config-system-screen.png)
 
