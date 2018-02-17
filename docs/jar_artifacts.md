@@ -1,4 +1,4 @@
-# Overview
+# JAR Artifacts
 
 Artifacts can be used to provide libraries, rules, schemas, and custom code to applications.  JAR artifacts follow Apache Maven standards which require groupId, artifactId and version to be specified.  JAR files can be uploaded manually and synchronized automatically from a Maven artifacts directory accessible by the Gateway.  Users can also build new JAR files by creating new schemas using the **New Schema** dialog in the DT RTS Console.  Once the JAR artifacts are added to the DT RTS system, Apex applications can reference them in the [Application Configuration](/application_configurations/) page.
 
