@@ -13,7 +13,7 @@ To view the **JAR Artifacts** page, follow the steps below:
 
 Sample JAR artifacts list:
 
-![](/images/jar_artifacts/artifacts-list.png)
+![](images/jar_artifacts/artifacts-list.png)
 
 # Searching and Filtering
 
@@ -26,7 +26,7 @@ To the right of the artifact counts are the **previous** and **next** page butto
 
 Artifacts per page dropdown menu:
 
-![](/images/jar_artifacts/items-per-page-menu.png)
+![](images/jar_artifacts/items-per-page-menu.png)
 
 To change the artifacts per page, follow the steps below:
 
@@ -44,7 +44,7 @@ To create a new schema, follow the steps below:
 
 Sample of a new schema dialog:
 
-![](/images/jar_artifacts/new-schema-dialog.png)
+![](images/jar_artifacts/new-schema-dialog.png)
 
 The following entries are shown on the **New Schema** dialog:
 
@@ -70,7 +70,7 @@ To upload a JAR file, follow the steps below:
 
     Sample JAR file upload dialog:
 
-    ![](/images/jar_artifacts/jar-upload-dialog.png)
+    ![](images/jar_artifacts/jar-upload-dialog.png)
 
 5. Enter the Group ID, Artifact ID and Version if necessary.
 6. Click the **Save** button to save the JAR file to the artifacts global space.
