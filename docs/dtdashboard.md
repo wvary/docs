@@ -179,7 +179,7 @@ When importing a dashboard, the interface tries its best to preselect the most c
 
 Application packages may include packaged dashboards which can be imported. Application package developers may select some dashboards to be imported automatically when launching an application, and all packaged dashboards can be imported manually at any time from the Packaged Dashboards page.
 
-When [working with an application configuration](/application_configurations#working-with-application-configurations), the *Dashboards* section lists the packaged dashboards that will be auto imported when launched. These dashboards can be configured with new names and target applications.
+When [working with an application configuration](application_configurations.md#working-with-application-configurations), the *Dashboards* section lists the packaged dashboards that will be auto imported when launched. These dashboards can be configured with new names and target applications.
 
 *Note*: Auto imports of packaged dashboards only happen if there isn't already an existing dashboard with the same name and owner. They can still be marked for import in the launch interface, but will have to be given a unique name.
 

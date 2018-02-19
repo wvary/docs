@@ -3,15 +3,15 @@ Creating Applications
 
 Here are a few links to get you started:
 
-- [Beginner's Guide](/beginner) An introductory guide that shows you how to generate a new
+- [Beginner's Guide](beginner.md) An introductory guide that shows you how to generate a new
   ready-to-run Apex application using the maven archetype and a good deal of the application
   landscape at an introductory level.
 
-- [Operator Development](/operator_development)
+- [Operator Development](operator_development.md)
 
-- [Operator Library](/library_operators)
+- [Operator Library](library_operators.md)
 
-- [Demo Videos](/demo_videos)
+- [Demo Videos](demo_videos.md)
 
 
 
