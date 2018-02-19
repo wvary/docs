@@ -4,7 +4,7 @@ Application Configurations
 An application configuration is a collection of custom settings applied to an application.
 These settings may include properties, launch options, artifacts, services, and dashboards.
 Application Configurations can be thought of as wrappers for Applications, which allow for clean separation between 
-application sources and application runtime configurations.  Configurations are based on [Configuration Packages](/configuration_packages) and can be created, modified, and deleted without affecting the source application packages.  And once created they can be downloaded, shared, and uploaded, enabling convenient storage and transporation of application settings across multiple environments.
+application sources and application runtime configurations.  Configurations are based on [Configuration Packages](configuration_packages) and can be created, modified, and deleted without affecting the source application packages.  And once created they can be downloaded, shared, and uploaded, enabling convenient storage and transportation of application settings across multiple environments.
 
 ![](images/application_configurations/working_with.png)
 
@@ -130,7 +130,7 @@ Like uploaded JAR artifacts, file artifacts are stored inside the configuration.
 Services
 --------
 
-See the main [Services](/services) page for an in-depth explanation of services.
+See the main [Services](services) page for an in-depth explanation of services.
 
 By default, services are pulled in from the source application package. Services can also be added to application configurations. Services in application configurations will be started (or installed first, then started) when the configuration is launched. Some applications have predefined services and will appear in the services list when the configuration is created. Custom services can also be added to the configuration.
 
@@ -152,7 +152,7 @@ Dashboards are automatically imported (if they have not already been) when the a
 
 ![](images/application_configurations/working_with_dashboards.png)
 
-See the [Packaged Dashboard](/dtdashboard#packaged-dashboards) section in the dtDashboard page for more details.
+See the [Packaged Dashboard](dtdashboard/#packaged-dashboards) section in the dtDashboard page for more details.
 
 #### Configuring a Packaged Dashboard
 
