@@ -82,15 +82,15 @@ The operations home page shows overall cluster statistics as well as a list of r
 
 ![Operations Home Page](images/dtmanage/console-monitor-home.png)
 
-The CPU/Memory section shows the cpu cores and memory usage statistics.  The sample image above shows that `10.48 cores` currently being used by Apex applications.  It also shows there are currently `788 GB` of memory being used and at one time memory usage peaked at `991.5 GB`.
+The CPU/Memory section shows the cpu cores and memory usage statistics.  The sample above shows that Apex applications are currently using `10.48 cores` and `788 GB` of memory, and that at one time memory usage peaked at `991.5 GB`.
 
-The Applications section shows counts of all current application states.  The sample image shows there are `6 running` applications and `0 pending`.  It is important that the `pending` count does not statically show a value other than zero.  If this occurs, then you may lack cpu/memory resources to start a new application.
+The Applications section shows counts of all current application states.  The sample image shows there are `6 running` applications and `0 pending`.  It is important that the `pending` count does not continually show a value other than zero, which may indicate that the cluster lacks available cpu/memory resources to start a new application.
 
-The Performance section shows current statistics such as container and operator counts, tuples processed per seconds and tuples emitted per seconds.
+The Performance section shows current statistics such as container and operator counts, tuples processed per seconds and tuples emitted per seconds across all Apex applications.
 
-The Issues section shows warning and error counts.  The count style changes to a clickable button if value is not zero.  When clicked on the button, a popup shows the description of the  warning/error issue.
+The Issues section shows warning and error counts.  The count style changes to a clickable button if the value is nonzero.  Additional details about the errors and warnings may be viewed by clicking the error or warning count buttons, or by navigating to the [System Information](#system-information) section.
 
-The Services section shows the current running/failed/stopped services.  Only states with non zero values are shown.  The image above shows there are `7 running` services.
+The Services section shows the current running/failed/stopped services.  Only states with nonzero values are shown.  The image above shows there are `7 running` services.
 
 Below the cluster overview is a list of running applications.  In this list each column has a filter input just below the header which is useful for locating specific applications when there is a large number of applications running.  Clicking on individual column headers will sort the rows by that column value.  Clicking on a specific application id or name will take you to the instance page for that application (see below).
 
