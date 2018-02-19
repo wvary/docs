@@ -23,7 +23,7 @@ The AppFactory hosts a collection of applications and templates grouped by vario
 
 ## Launch
 
-The Launch page lists all of the **Applications** and [**Configurations**](docs/application_configurations.md) available for launching, as well as offering convenient management features.
+The Launch page lists all of the **Applications** and [**Configurations**](application_configurations.md) available for launching, as well as offering convenient management features.
 
 ![Launch](images/dtmanage/console-launch.png)
 
