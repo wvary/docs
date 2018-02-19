@@ -82,7 +82,17 @@ The operations home page shows overall cluster statistics as well as a list of r
 
 ![Operations Home Page](images/dtmanage/console-monitor-home.png)
 
-The cluster statistics include performance statistics and memory usage information.  Below is a list of running applications.  In this list each column has a filter input just below the header which is useful for locating specific applications when there is a large number of applications running.  Clicking on individual column headers will sort the rows by that column value.  Clicking on a specific application id or name will take you to the instance page for that application (see below).
+The CPU/Memory section shows the cpu cores and memory usage statistics.  The sample image above shows that `10.48 cores` currently being used by Apex applications.  It also shows there are currently `788 GB` of memory being used and at one time memory usage peaked at `991.5 GB`.
+
+The Applications section shows counts of all current application states.  The sample image shows there are `6 running` applications and `0 pending`.  It is important that the `pending` count does not statically show a value other than zero.  If this occurs, then you may lack cpu/memory resources to start a new application.
+
+The Performance section shows current statistics such as container and operator counts, tuples processed per seconds and tuples emitted per seconds.
+
+The Issues section shows warning and error counts.  The count style changes to a clickable button if value is not zero.  When clicked on the button, a popup shows the description of the  warning/error issue.
+
+The Services section shows the current running/failed/stopped services.  Only states with non zero values are shown.  The image above shows there are `7 running` services.
+
+Below the cluster overview is a list of running applications.  In this list each column has a filter input just below the header which is useful for locating specific applications when there is a large number of applications running.  Clicking on individual column headers will sort the rows by that column value.  Clicking on a specific application id or name will take you to the instance page for that application (see below).
 
 Selecting the **ended apps** button will include all ended applications that are still in the resource manager history.
 
@@ -110,8 +120,7 @@ The “shutdown” function tries to gracefully stop the application, while “k
 
 **Note**: You should not shutdown or kill an Apex application which is running as a service.  If you want to terminate such an application, then you should stop or delete the service.  For more details on stopping and deleting services, refer to the [Services](services.md) section. 
 
-The "AM logs" button shows you a dropdown where you can view the App Master logs; often, application errors
-or other anomalies will be reflected in these logs in some way.
+The **AM logs** button shows you a dropdown menu where you may find the App Master logs, application log and GC log.  Selecting one of the menu options will take you to the log page where you can analyze the logs.  See the [Viewing Logs](#viewing-logs) section for more details.
 
 You can also use the **set logging level** button on this widget to specify what logging level gets written to the dt.log files. 
 
@@ -183,14 +192,12 @@ described next.
 #### Containers List Widget
 
 Shows the containers in the application. Selecting a container by clicking on the checkbox
-will trigger the display of additinal buttons which allow you to retrieve logs, fetch info for
+will trigger the display of additional buttons which allow you to retrieve logs, fetch info for
 containers that have already terminated, retrieve a stack dump, or kill selected containers:
 
 ![](images/dtmanage/ContainerButtons.png)
 
-The first container in the list is typically the one with Application Master in it and has a corresponding label next to it as shown
-in the above screenshot. The entries in the id column are clickable links that take you to the
-page for a specific container, showing the physical operators hosted in it and the relevant statistics:
+The Application Master container is the one whose container id ends with `_000001`.  The `AppMaster` label is shown to the right of the id, as shown in the above screenshot. The entries in the id column are clickable links that take you to the page for a specific container, showing the physical operators hosted in it and the relevant statistics:
 
 ![](images/dtmanage/PhysicalOperators.png)
 
@@ -243,6 +250,7 @@ There is a mechanism called tuple recording that can be used to easily look at t
 
 >**Pro tip:** Select multiple tuples by holding down the shift key.
 
+<a name="viewing-logs">
 ### Viewing Logs
 
 Another useful feature of the Console is the ability to view container logs of a given application. To do this, select a container from the Containers List widget (default location of this widget is in the “physical” dashboard). Then click the logs dropdown and select the log you want to look at:
