@@ -96,7 +96,7 @@ Below the cluster overview is a list of running applications.  In this list each
 
 Selecting the **ended apps** button will include all ended applications that are still in the resource manager history.
 
-Notice the **services** designation on the _ato-online-analytics-service_ and _fpa-online-analytics-service_ applications in the image above.  These are Apex applications running as services.  For more details on services, refer to the [Services](/services) section.
+Notice the **services** designation on the _ato-online-analytics-service_ and _fpa-online-analytics-service_ applications in the image above.  These are Apex applications running as services.  For more details on services, refer to the [Services](services.md) section.
 
 ### Instance Page
 
@@ -331,7 +331,7 @@ By default, your installation starts with no security enabled, which may be suff
 DataTorrent RTS supports various authentication methods which can be enabled by following instructions in the [Authentication](dtgateway_security/#authentication) section.
 
 ### Services
-Services represent global, shared, and automatically managed processes. These processes are automatically installed, managed, and monitored by the Gateway, and can be an instance of an Apex application or a Docker container. Applications can rely on any number of services as their dependencies, and all the required services will be automatically installed and launched as needed when the application starts.  For more details refer to the [Services](/services) section.
+Services represent global, shared, and automatically managed processes. These processes are automatically installed, managed, and monitored by the Gateway, and can be an instance of an Apex application or a Docker container. Applications can rely on any number of services as their dependencies, and all the required services will be automatically installed and launched as needed when the application starts.  For more details refer to the [Services](services.md) section.
 
 ![Services](images/services/services-list.png)
 
@@ -434,4 +434,4 @@ When your Hadoop cluster has security enabled with Kerberos, there will be four 
 
 > **Note:** The token lifetime values you enter will not actually set these values in your hadoop configuration, it is only meant to inform the DataTorrent platform of these values.
 
-Docker configuration is optional.  For more details, refer to the [Docker Configuration](/services/#configuring-docker) section.
+Docker configuration is optional.  For more details, refer to the [Docker Configuration](services.md/#configuring-docker) section.
