@@ -434,4 +434,4 @@ When your Hadoop cluster has security enabled with Kerberos, there will be four 
 
 > **Note:** The token lifetime values you enter will not actually set these values in your hadoop configuration, it is only meant to inform the DataTorrent platform of these values.
 
-Docker configuration is optional.  For more details, refer to the [Docker Configuration](services.md/#configuring-docker) section.
+Docker configuration is optional.  For more details, refer to the [Docker Configuration](services.md#configuring-docker) section.
