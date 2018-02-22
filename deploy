@@ -9,10 +9,10 @@ var yargs = require('yargs');
 var argv = yargs
   .usage('Usage: $0 <command> [options]')
   .example('$0 build --hash --docs-version', 'Builds the mkdocs project using the hash and docs-version.')
-  .example('$0 build --tag', 'Builds the mkdocs project using the tag.')
+  .example('$0 build --tag --docs-version', 'Builds the mkdocs project using the tag.')
   .example('$0 delete --docs-version', 'Removes a version from gh-pages.')
   .example('$0 link --docs-version --orig-version', 'Creates symbolic link in the "v" folder and add a new version to the versions.json file.')
-  .demand(1)
+  // .demand(1)
   .command('build', 'Builds and deploys one or more version.')
   .command('delete', 'Removes a version.')
   .command('link', 'Links one version to another by creating a symbolic link in the "v" folder.')
@@ -20,10 +20,17 @@ var argv = yargs
     describe: 'The version to tag the build as.'
   })
   .option('hash', {
+    default: '',
     describe: 'The hash to checkout.  docs-version is required if hash is specified.'
   })
   .option('tag', {
+    default: '',
     describe: 'The tag to checkout.  docs-version is not necessary if tag is provided.'
+  })
+  .option('init', {
+    describe: 'Set to true if you want to build specified version into an empty content.  If false, new version is added to existing gh-pages branch contents.',
+    type: 'boolean',
+    default: 'false'
   })
   .count('v')
   .alias('v', 'verbose')
@@ -33,12 +40,23 @@ var argv = yargs
 
 var tempDir = process.env.TMPDIR + 'docs_' + Date.now();
 var customDir = tempDir + '/custom';
-
+var wwwDir = tempDir + '/www';
+var versionDir = wwwDir + '/v/' + argv.docsVersion;
+var latestVersion;
 
 function log() {
   if (argv.v) {
     console.log('>>> ' + arguments[0], arguments[1]);
   }
+}
+
+/*
+ * Create temp directories
+ */
+function createTempDirectories() {
+  var statement = 'mkdir -p ' + wwwDir;
+  log('creating temp directories, statement:', statement);
+  execSync(statement);
 }
 
 /*
@@ -51,11 +69,38 @@ function copyCustomFolder() {
   execSync(statement);
 }
 
+/*
+ * Get contents from gh-pages branch
+ */
+function getGhPagesContents() {
+  var statement;
+
+  if (!argv.init) {
+    // we want to create new build into existing gh-page contents
+
+    // checkout gh-pages
+    var statement = 'git checkout gh-pages';
+    log('checkout gh-pages, statement:', statement);
+    execSync(statement);
+
+    // copy files to temp folder
+    statement = 'cp -r * ' + wwwDir;
+    log('copying contents to temp dir, statement:', statement);
+    execSync(statement);
+
+    checkoutPrevBranch();
+  }
+
+  // create "v" directory if not exist
+  statement = 'mkdir -p ' + wwwDir + '/v';
+  log('create "v" directory, statement:', statement);
+  execSync(statement);
+}
 
 /*
  * Checkout tag/hash to be built
  */
-function runGitCheckout() {
+function checkoutTag() {
   var statement = 'git checkout ' + argv.tag || argv.hash;
   log('run git checkout, statement:', statement);
   execSync(statement);
@@ -64,9 +109,9 @@ function runGitCheckout() {
 /*
  *  Copy custom folder to docs folder
  */
-function addCustomFolder() {
-  var statement = 'cp -r custom ' + argv.docsFolder + '/docs/custom';
-  log('copy custom folder statement:', statement);
+function injectCustomFolder() {
+  var statement = 'cp -r ' + customDir + ' docs/custom';
+  log('injecting custom folder, statement:', statement);
   execSync(statement);
 }
 
@@ -75,7 +120,7 @@ function addCustomFolder() {
  */
 function injectCustomLoader() {
   // set file name
-  var file = argv.docsFolder + '/mkdocs.yml';
+  var file = 'mkdocs.yml';
   log('adding custom-loader.js to mkdocs file:', file);
 
   // read file mkdocs.yml
@@ -108,17 +153,16 @@ function injectCustomLoader() {
  * Run the mkdcos build command
  */
 function runBuildCommand() {
-  // run the mkdocs build command
-  log('Executing mkdocs build', 'cwd: ' + argv.docsFolder);
-  execSync('mkdocs build', { cwd: argv.docsFolder });
+  log('Executing mkdocs build');
+  execSync('mkdocs build');
 }
 
 /*
  * Remove version folder from v directory
  */
 function removeVersionFolder() {
-  var statement = 'rm -rf ' + argv.wwwFolder + '/v/' + argv.docsVersion;
-  log('Removing existing version folder:', statement);
+  var statement = 'rm -rf ' + versionDir;
+  log('Removing existing version folder, statement:', statement);
   execSync(statement);
 }
 
@@ -126,8 +170,8 @@ function removeVersionFolder() {
  * Move site folder to www folder
  */
 function moveSiteFolder() {
-  var statement = 'mv ' + argv.docsFolder + '/site ' + argv.wwwFolder + '/v/' + argv.docsVersion;
-  log('Moving site folder, statement: ', statement);
+  var statement = 'mv site ' + versionDir;
+  log('Moving site folder, statement:', statement);
   execSync(statement);
 }
 
@@ -135,9 +179,20 @@ function moveSiteFolder() {
  * Update versions.json in www folder
  */
 function updateVersionsJson(mode) {
-  var file = argv.wwwFolder + '/versions.json';
+  var file = wwwDir + '/versions.json';
   log('Updating version file:', file);
-  var content = fs.readFileSync(file, 'utf-8');
+
+
+  var content;
+
+  if (fs.existsSync(file)) {
+    // file exists, read it
+    content = fs.readFileSync(file, 'utf-8');
+  } else {
+    // file does not exist, set to empty array
+    content = '[]';
+  }
+
   var json = JSON.parse(content);
   var idx = _.findIndex(json, function(row) {
     return (row.version === argv.docsVersion);
@@ -163,26 +218,99 @@ function updateVersionsJson(mode) {
     return -semverCompare(rowA.version, rowB.version);
   });
 
-  // only first item in first should be latest version
-  _.each(json, function(row, k) {
-    row.latest = (k === 0);
-  });
+  if (json.length) {
+    // save latest version for later use
+    latestVersion = json[0].version;
+  }
+  log('latestVersion is ' + latestVersion);
 
+  log('json', json);
+  log('saving versions json to ' + file);
   fs.writeFileSync(file, JSON.stringify(json));
+}
+
+/*
+ * Copy latest version content to root directory
+ */
+function copyLatestVersionToRoot() {
+  if (latestVersion) {
+    var statement = 'cp -r ' + wwwDir + '/v/' + latestVersion + '/* ' + wwwDir;
+    log('copying latest version to root, statement:', statement);
+    execSync(statement);
+  }
+}
+
+/*
+ * Copy contents from temp directory to gh-pages branch
+ */
+function saveContentsToGhPages() {
+  // checkout branch
+  var statement = 'git checkout gh-pages';
+  log('checkout gh-pages, statement:', statement);
+  execSync(statement);
+
+  // remove all files
+  statement = 'rm -r *';
+  log('remove all files in branch, statement:', statement);
+  execSync(statement);
+
+  // copy files from temp directory to branch
+  statement = 'cp -r ' + wwwDir + '/* .';
+  log('copying files from temp directory, statement:', statement);
+  execSync(statement);
+
+  // commit to branch
+  statement = 'git add . ; git commit -m "saving build v' + argv.docsVersion + '" ;';
+  log('commit files to branch, statement:', statement);
+  execSync(statement);
+}
+
+/*
+ * Clean changed and untracked files in current branch
+ */
+function cleanGitBranch() {
+  var statement = 'git checkout . ; git clean -f -d';
+  log('clean branch, statement:', statement);
+  execSync(statement);
+}
+
+/*
+ * Checkout previous branch
+ */
+function checkoutPrevBranch() {
+  var statement = 'git checkout -';
+  log('checkout previous branch, statement:', statement);
+  execSync(statement);
+}
+
+/*
+ * Create symbolic link from new version to orig version
+ */
+function createSymbolicLink() {
+  var statement = 'ln -sf ' + wwwDir + '/v/' + argv.origVersion + ' ' + wwwDir + '/v/' + argv.docsVersion;
+  log('creating symbolic link, statement:', statement);
+  execSync(statement);
 }
 
 /*
  * Build a version
  */
 function build() {
+  createTempDirectories();
   copyCustomFolder();
-  runGitCheckout()
-  // addCustomFolder();
-  // injectCustomLoader();
-  // runBuildCommand();
-  // removeVersionFolder();
-  // moveSiteFolder();
-  // updateVersionsJson('add');
+  getGhPagesContents();
+  checkoutTag()
+  injectCustomFolder();
+  injectCustomLoader();
+  runBuildCommand();
+  removeVersionFolder();
+  moveSiteFolder();
+  updateVersionsJson('add');
+  cleanGitBranch();
+  checkoutPrevBranch();
+  copyLatestVersionToRoot();
+  saveContentsToGhPages();
+  checkoutPrevBranch();
 }
 
 /*
@@ -190,22 +318,35 @@ function build() {
 
  */
 function delele() {
+  createTempDirectories();
+  getGhPagesContents();
   removeVersionFolder();
   updateVersionsJson('delete');
+  copyLatestVersionToRoot();
+  saveContentsToGhPages();
+  checkoutPrevBranch();
 }
 
 /*
  * creates a symbolic link from one version to another
  */
 function link() {
-  createLink();
-  updateVersionsJson('link');
+  createTempDirectories();
+  getGhPagesContents();
+  createSymbolicLink();
+  updateVersionsJson('add');
+  saveContentsToGhPages();
+  checkoutPrevBranch();
 }
 
 log('command:', argv._[0]);
 log('tag:', argv.tag);
 log('hash:', argv.hash);
 log('docs-version:', argv.docsVersion);
+log('tempDir:', tempDir);
+log('customDir:', customDir);
+log('wwwDir:', wwwDir);
+log('versionDir:', versionDir);
 
 switch(argv._[0]) {
   case 'build':
