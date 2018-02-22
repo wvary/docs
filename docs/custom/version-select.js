@@ -25,7 +25,7 @@ function initializeVersionSelection() {
   var REL_BASE_URL = (typeof base_url === 'undefined' ? '.' : base_url);
   var ABS_BASE_URL = normalizePath(window.location.pathname + "/" +
                                    REL_BASE_URL);
-  var CURRENT_VERSION = ABS_BASE_URL.split("/v/")[1] || 'latest';
+  var CURRENT_VERSION = ABS_BASE_URL.split("/v/")[1] || '';
 
   function makeSelect(options, selected) {
     var select = document.createElement("select");
@@ -43,35 +43,41 @@ function initializeVersionSelection() {
   // xhr.open("GET", REL_BASE_URL + "/../versions.json");
   xhr.open("GET", "/versions.json");
   xhr.onload = function() {
-    var versions = JSON.parse(this.responseText);
+    var versions = JSON.parse(this.responseText || '[]');
 
-
+    if (versions.length) {
+      versions.unshift({
+        aliases: versions[0].aliases,
+        title: 'latest (' + versions[0].title + ')',
+        version: ''
+      });
+    }
 
     var currentVersion = versions.find(function(i) {
       return i.version === CURRENT_VERSION ||
-             i.aliases.includes(CURRENT_VERSION) ||
-             (CURRENT_VERSION === 'latest' && i.latest);
+             i.aliases.includes(CURRENT_VERSION);
     });
-
     var select = makeSelect(versions.map(function(i) {
-      return {text: i.title + (i.latest ? ' (latest)' : ''), value: i.version};
+      return {text: i.title, value: i.version};
     }), currentVersion.version);
     select.id = "version-selector";
+
     select.addEventListener("change", function(event) {
+      var selectedVersion = this.value === '' ? '' : '/v/' + this.value;
       var match = window.location.href.match(/\/v\/[0-9]*\.[0-9]*\.[0-9]*\//);
       if (match) {
         // path has version number in it
-        window.location.href = window.location.href.replace(/\/v\/[0-9]*\.[0-9]*\.[0-9]*\//,  '/v/' + this.value + '/');
+        window.location.href = window.location.href.replace(/\/v\/[0-9]*\.[0-9]*\.[0-9]*\//,  selectedVersion + '/');
       } else {
         // path does not have version in it
-        window.location.href = window.location.href.replace(window.location.origin, window.location.origin + '/v/' + this.value);
+        window.location.href = window.location.href.replace(window.location.origin, window.location.origin + selectedVersion);
       }
       // window.location.href = REL_BASE_URL + "/../" + this.value;
     });
 
     var div = document.createElement('div');
     div.className = 'version-selected-heading';
-    div.append('v' + currentVersion.title + (currentVersion.latest ? ' (latest)' : ''));
+    div.append((currentVersion.title.indexOf('latest') === -1 ? 'v' : '') + currentVersion.title);
     var title = document.querySelector("div.wy-side-nav-search");
     title.insertBefore(div, title.querySelector(".icon-home").nextSibling);
 
