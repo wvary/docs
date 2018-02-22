@@ -6,25 +6,17 @@ var _ = require('lodash');
 var semverCompare = require('semver-compare');
 var yargs = require('yargs');
 
-var statement;
 var argv = yargs
   .usage('Usage: $0 <command> [options]')
-  .example('$0 deploy --docs-folder --www-folder --docs-version', 'Builds the mkdocs project and copy the site folder to the www/v directory using the version specified.')
-  .example('$0 delete --www-folder --docs-version', 'Removes a version from teh www folder "v" folder and the versions.json file.')
-  .example('$0 link --www-folder --docs-version --orig-version', 'Creates a symbolic link in the "v" folder and add a new version to the versions.json file.')
+  .example('$0 build --docs-version', 'Builds the mkdocs project using the tag or version and push it to gh-pages.')
+  .example('$0 delete --docs-version', 'Removes a version from gh-pages.')
+  .example('$0 link --docs-version --orig-version', 'Creates symbolic link in the "v" folder and add a new version to the versions.json file.')
   .demand(1)
-  .command('deploy', 'Builds and deploys the mkdocs project')
-  .command('delete', 'Removes a version from the www-folder')
-  .command('link', 'Links one version to another by creating a symbolic link in the v folder')
-  .option('docs-folder', {
-    describe: 'Root folder of the mkdocs project.',
-  })  
-  .option('www-folder', {
-    describe: 'Folder where the mkdocs built site folder is copied to.',
-  })  
+  .command('build', 'Builds and deploys one or more version.')
+  .command('delete', 'Removes a version.')
+  .command('link', 'Links one version to another by creating a symbolic link in the "v" folder.')
   .option('docs-version', {
-    describe: 'The version to tag the build as.',
-    type: 'string'
+    describe: 'The version to tag the build as.'
   })
   .count('v')
   .alias('v', 'verbose')
@@ -32,11 +24,23 @@ var argv = yargs
   .alias('h', 'help')
   .argv;
 
+var tempDir = process.env.TMPDIR + 'docs_' + Date.now();
+var customDir = tempDir + '/custom';
+
 
 function log() {
   if (argv.v) {
     console.log('>>> ' + arguments[0], arguments[1]);
   }
+}
+
+/*
+ * Copy custom files to temp folder
+ */
+function copyCustomFolder() {
+  var statement = 'cp -r docs/custom ' + customDir;
+  log('copying custom folder to ' + customDir, 'statement: ' + statement);
+  execSync(statement);
 }
 
 
@@ -151,15 +155,16 @@ function updateVersionsJson(mode) {
 }
 
 /*
- * deploy a version
+ * Build a version
  */
-function deploy() {
-  addCustomFolder();
-  injectCustomLoader();
-  runBuildCommand();
-  removeVersionFolder();
-  moveSiteFolder();
-  updateVersionsJson('add');
+function build() {
+  copyCustomFolder();
+  // addCustomFolder();
+  // injectCustomLoader();
+  // runBuildCommand();
+  // removeVersionFolder();
+  // moveSiteFolder();
+  // updateVersionsJson('add');
 }
 
 /*
@@ -180,13 +185,11 @@ function link() {
 }
 
 log('command:', argv._[0]);
-log('docs-folder:', argv.docsFolder);
-log('www-folder:', argv.wwwFolder);
 log('docs-version:', argv.docsVersion);
 
 switch(argv._[0]) {
-  case 'deploy':
-    deploy();
+  case 'build':
+    build();
     break;
   case 'delete':
     delele();
