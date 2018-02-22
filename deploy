@@ -51,18 +51,19 @@ function log() {
 }
 
 /*
- * Create temp directories
+ * Create temp directory where builds are copied to
  */
-function createTempDirectories() {
+function createTempDirectory() {
   var statement = 'mkdir -p ' + wwwDir;
   log('creating temp directories, statement:', statement);
   execSync(statement);
 }
 
 /*
- * Copy custom files to temp folder
+ * Copy custom files to temp folder so we can use to inject into tag/branch/hash
+ * where files in this custom folder may not exist
  */
-function copyCustomFolder() {
+function copyCustomFolderToTempDir() {
   var statement = 'cp -r docs/custom ' + tempDir;
   log('copying custom folder, statement:', statement);
   execSync('mkdir -p ' + customDir);
@@ -70,9 +71,9 @@ function copyCustomFolder() {
 }
 
 /*
- * Get contents from gh-pages branch
+ * Copy existing contents from gh-pages branch to temp directory
  */
-function getGhPagesContents() {
+function copyGhPagesContentsToTempDir() {
   var statement;
 
   if (!argv.init) {
@@ -98,16 +99,17 @@ function getGhPagesContents() {
 }
 
 /*
- * Checkout tag/hash to be built
+ * Checkout hash or tag to be built
  */
-function checkoutTag() {
+function checkoutHashOrTag() {
   var statement = 'git checkout ' + argv.tag || argv.hash;
   log('run git checkout, statement:', statement);
   execSync(statement);
 }
 
 /*
- *  Copy custom folder to docs folder
+ * Copy custom folder from temp directory to the branch we 
+ * are building
  */
 function injectCustomFolder() {
   var statement = 'cp -r ' + customDir + ' docs/custom';
@@ -116,9 +118,10 @@ function injectCustomFolder() {
 }
 
 /*
- * Inject custom-loader.js to mkdocs.yml if necessary
+ * Inject custom-loader.js into the mkdocs.yml file in the
+ * branch we are building
  */
-function injectCustomLoader() {
+function injectCustomLoaderJs() {
   // set file name
   var file = 'mkdocs.yml';
   log('adding custom-loader.js to mkdocs file:', file);
@@ -150,15 +153,15 @@ function injectCustomLoader() {
 }
 
 /*
- * Run the mkdcos build command
+ * Run the mkdocs build command
  */
-function runBuildCommand() {
-  log('Executing mkdocs build');
+function runMkdocsBuildCommand() {
+  log('Executing mkdocs build, statement:', 'mkdocs build');
   execSync('mkdocs build');
 }
 
 /*
- * Remove version folder from v directory
+ * Remove version folder from "v" directory inside the temp directory
  */
 function removeVersionFolder() {
   var statement = 'rm -rf ' + versionDir;
@@ -167,16 +170,20 @@ function removeVersionFolder() {
 }
 
 /*
- * Move site folder to www folder
+ * Move site folder to "v" directory inside temp dirctory
  */
-function moveSiteFolder() {
+function moveSiteFolderToTempDirectory() {
   var statement = 'mv site ' + versionDir;
-  log('Moving site folder, statement:', statement);
+  log('Moving site folder to "v" diretory, statement:', statement);
   execSync(statement);
 }
 
 /*
- * Update versions.json in www folder
+ * Update versions.json in temp directory
+ * mode can be 'add' or 'delete'
+ * If mode is 'add', then we are adding a version to the file.
+ * If mode is 'delete', then we are remove a version from the file.
+ * We also sort the file to be descending order using the version property.
  */
 function updateVersionsJson(mode) {
   var file = wwwDir + '/versions.json';
@@ -230,7 +237,7 @@ function updateVersionsJson(mode) {
 }
 
 /*
- * Copy latest version content to root directory
+ * Copy latest version content to the root directory of temp directory
  */
 function copyLatestVersionToRoot() {
   if (latestVersion) {
@@ -243,7 +250,7 @@ function copyLatestVersionToRoot() {
 /*
  * Copy contents from temp directory to gh-pages branch
  */
-function saveContentsToGhPages() {
+function copyContentsToGhPages() {
   // checkout branch
   var statement = 'git checkout gh-pages';
   log('checkout gh-pages, statement:', statement);
@@ -296,20 +303,20 @@ function createSymbolicLink() {
  * Build a version
  */
 function build() {
-  createTempDirectories();
-  copyCustomFolder();
-  getGhPagesContents();
-  checkoutTag()
+  createTempDirectory();
+  copyCustomFolderToTempDir();
+  copyGhPagesContentsToTempDir();
+  checkoutHashOrTag()
   injectCustomFolder();
-  injectCustomLoader();
-  runBuildCommand();
+  injectCustomLoaderJs();
+  runMkdocsBuildCommand();
   removeVersionFolder();
-  moveSiteFolder();
+  moveSiteFolderToTempDirectory();
   updateVersionsJson('add');
   cleanGitBranch();
   checkoutPrevBranch();
   copyLatestVersionToRoot();
-  saveContentsToGhPages();
+  copyContentsToGhPages();
   checkoutPrevBranch();
 }
 
@@ -318,12 +325,12 @@ function build() {
 
  */
 function delele() {
-  createTempDirectories();
-  getGhPagesContents();
+  createTempDirectory();
+  copyGhPagesContentsToTempDir();
   removeVersionFolder();
   updateVersionsJson('delete');
   copyLatestVersionToRoot();
-  saveContentsToGhPages();
+  copyContentsToGhPages();
   checkoutPrevBranch();
 }
 
@@ -331,11 +338,11 @@ function delele() {
  * creates a symbolic link from one version to another
  */
 function link() {
-  createTempDirectories();
-  getGhPagesContents();
+  createTempDirectory();
+  copyGhPagesContentsToTempDir();
   createSymbolicLink();
   updateVersionsJson('add');
-  saveContentsToGhPages();
+  copyContentsToGhPages();
   checkoutPrevBranch();
 }
 
