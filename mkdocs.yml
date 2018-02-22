@@ -2,8 +2,7 @@ site_name: DataTorrent Documentation
 google_analytics: ['UA-44586211-2', 'docs.datatorrent.com']
 site_favicon: favicon.ico
 theme: readthedocs
-extra_css: ['menu.css', 'css/version-select.css']
-extra_javascript: ['menu.js', 'js/version-select.js']
+extra_javascript: ['custom/custom-loader.js']
 pages:
 - DataTorrent RTS: index.md
 - Demos:
