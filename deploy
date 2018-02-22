@@ -8,7 +8,8 @@ var yargs = require('yargs');
 
 var argv = yargs
   .usage('Usage: $0 <command> [options]')
-  .example('$0 build --docs-version', 'Builds the mkdocs project using the tag or version and push it to gh-pages.')
+  .example('$0 build --hash --docs-version', 'Builds the mkdocs project using the hash and docs-version.')
+  .example('$0 build --tag', 'Builds the mkdocs project using the tag.')
   .example('$0 delete --docs-version', 'Removes a version from gh-pages.')
   .example('$0 link --docs-version --orig-version', 'Creates symbolic link in the "v" folder and add a new version to the versions.json file.')
   .demand(1)
@@ -17,6 +18,12 @@ var argv = yargs
   .command('link', 'Links one version to another by creating a symbolic link in the "v" folder.')
   .option('docs-version', {
     describe: 'The version to tag the build as.'
+  })
+  .option('hash', {
+    describe: 'The hash to checkout.  docs-version is required if hash is specified.'
+  })
+  .option('tag', {
+    describe: 'The tag to checkout.  docs-version is not necessary if tag is provided.'
   })
   .count('v')
   .alias('v', 'verbose')
@@ -38,11 +45,21 @@ function log() {
  * Copy custom files to temp folder
  */
 function copyCustomFolder() {
-  var statement = 'cp -r docs/custom ' + customDir;
-  log('copying custom folder to ' + customDir, 'statement: ' + statement);
+  var statement = 'cp -r docs/custom ' + tempDir;
+  log('copying custom folder, statement:', statement);
+  execSync('mkdir -p ' + customDir);
   execSync(statement);
 }
 
+
+/*
+ * Checkout tag/hash to be built
+ */
+function runGitCheckout() {
+  var statement = 'git checkout ' + argv.tag || argv.hash;
+  log('run git checkout, statement:', statement);
+  execSync(statement);
+}
 
 /*
  *  Copy custom folder to docs folder
@@ -159,6 +176,7 @@ function updateVersionsJson(mode) {
  */
 function build() {
   copyCustomFolder();
+  runGitCheckout()
   // addCustomFolder();
   // injectCustomLoader();
   // runBuildCommand();
@@ -185,6 +203,8 @@ function link() {
 }
 
 log('command:', argv._[0]);
+log('tag:', argv.tag);
+log('hash:', argv.hash);
 log('docs-version:', argv.docsVersion);
 
 switch(argv._[0]) {
