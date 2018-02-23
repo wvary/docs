@@ -39,9 +39,25 @@ function initializeVersionSelection() {
     return select;
   }
 
+  var checkIfPageExistsInSelectedVersion = function(href2, versionSelect, event) {
+    var xhttp= new XMLHttpRequest();  
+    xhttp.open("GET", href2, true);
+    xhttp.send();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 404) {
+        alert('You will be placed in the home directory of version ' + versionSelect.value + ' because this page does not exist in that version.');
+        window.location.href = window.location.origin +  '/v/' + versionSelect.value + '/'; //home page
+      }
+      else if (this.readyState == 4 && this.status == 200) {
+        window.location.href = href2;
+      }
+    };  
+  }
+
+
   var xhr = new XMLHttpRequest();
   // xhr.open("GET", REL_BASE_URL + "/../versions.json");
-  xhr.open("GET", "/versions.json");
+  xhr.open('GET', '/versions.json?t=' + Date.now());
   xhr.onload = function() {
     var versions = JSON.parse(this.responseText || '[]');
 
@@ -65,13 +81,15 @@ function initializeVersionSelection() {
     select.addEventListener("change", function(event) {
       var selectedVersion = this.value === '' ? '' : '/v/' + this.value;
       var match = window.location.href.match(/\/v\/[0-9]*\.[0-9]*\.[0-9]*\//);
+      var href2;
       if (match) {
         // path has version number in it
-        window.location.href = window.location.href.replace(/\/v\/[0-9]*\.[0-9]*\.[0-9]*\//,  selectedVersion + '/');
+        href2 = window.location.href.replace(/\/v\/[0-9]*\.[0-9]*\.[0-9]*\//,  selectedVersion + '/');
       } else {
         // path does not have version in it
-        window.location.href = window.location.href.replace(window.location.origin, window.location.origin + selectedVersion);
+        href2 = window.location.href.replace(window.location.origin, window.location.origin + selectedVersion);
       }
+      checkIfPageExistsInSelectedVersion(href2, this, event);
       // window.location.href = REL_BASE_URL + "/../" + this.value;
     });
 

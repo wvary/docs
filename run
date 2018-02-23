@@ -335,7 +335,7 @@ function copyContentsToGhPages() {
   execSync(statement);
 
   // copy files from temp directory to branch
-  statement = 'cp -r ' + tempDir + '/* .';
+  statement = 'cp -R ' + tempDir + '/* .';
   log('copying files from temp directory, statement:', statement);
   execSync(statement);
 
@@ -365,7 +365,7 @@ function checkoutPrevBranch() {
  * Create symbolic link from new version to orig version
  */
 function createSymbolicLink() {
-  var statement = 'ln -sf v/' + argv.targetVersion + ' v/' + argv.docsVersion;
+  var statement = 'cd v ; ln -sf ' + argv.targetVersion + ' ' + argv.docsVersion;
   log('creating symbolic link, statement:', statement);
   execSync(statement);
 }
