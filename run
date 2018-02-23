@@ -360,7 +360,7 @@ function deployContentsToGhPages() {
  * Clean changed and untracked files in current branch
  */
 function cleanGitBranch() {
-  var statement = 'git checkout . ; git clean -f -d';
+  var statement = 'git checkout . ; git clean -f -d -e node_modules -e site';
   log('clean branch, statement:', statement);
   execSync(statement);
 }
