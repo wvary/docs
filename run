@@ -402,7 +402,7 @@ function build() {
  * remove a version
 
  */
-function delete() {
+function deleteVersion() {
   checkoutGhPageBranch();
   removeVersionDirectory();
   updateVersionsJson('delete', 'versions.json');
@@ -434,7 +434,7 @@ switch(argv._[0]) {
     build();
     break;
   case 'delete':
-    delete();
+    deleteVersion();
     break;
   case 'link':
     link();
