@@ -45,7 +45,6 @@ function initializeVersionSelection() {
     xhttp.send();
     xhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 404) {
-        alert('You will be placed in the home directory of version ' + versionSelect.value + ' because this page does not exist in that version.');
         window.location.href = window.location.origin +  '/v/' + versionSelect.value + '/'; //home page
       }
       else if (this.readyState == 4 && this.status == 200) {
