@@ -17,7 +17,7 @@ var argv = yargs
   .example('$0 link --docs-version --target-version', 'Creates symbolic link in the "v" directory and add a new version (docs-version) to the versions.json file.')
   .demand(1)
   .command('build', 'Builds a documentation version using the specified git-tag and set the title version using the specified docs-version.')
-  .command('delete', 'Removes a version.')
+  .command('delete', 'Removes a version.  Note: Delete does not handle linked versions correctly.')
   .command('link', 'Links one version to another by creating a symbolic link in the "v" directory.  Also adds version (docs-version) to the versions.json file.')
   .option('tag', {
     describe: 'The tag to checkout.  docs-version is not necessary if tag is provided.'
