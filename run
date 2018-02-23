@@ -378,9 +378,9 @@ function checkoutPrevBranch() {
  * Create symbolic link from new version to orig version
  */
 function createSymbolicLink() {
-  var statement = 'cd ' + tempDir + '/v ; ln -sf ' + argv.targetVersion + ' ' + argv.docsVersion + ' ; cd -';
+  var statement = 'cd ' + tempDir + '/v ; unlink ' + argv.docsVersion + ' ; ln -sf ' + argv.targetVersion + ' ' + argv.docsVersion + ' ; cd -';
   log('creating symbolic link, statement:', statement);
-  execSync(statement);
+  // execSync(statement);
 }
 
 /*
