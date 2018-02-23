@@ -1,0 +1,443 @@
+#!/usr/bin/env node
+
+'use strict';
+
+var fs = require('fs');
+var execSync = require('child_process').execSync;
+var spawnSync = require('child_process').spawnSync;
+var _ = require('lodash');
+var semverCompare = require('semver-compare');
+var yargs = require('yargs');
+
+var argv = yargs
+  .usage('Usage: $0 <command> [options]')
+  .example('$0 build --git-tag=3.10.0 --docs-version=3.10.0 --released=true', 'Builds the mkdocs project using the tag/hash and docs-version.')
+  .example('$0 build --git-tag=7c6200265787f548eb2ba4db392833791b518310 --docs-version=3.8.1', 'Builds the mkdocs project using the tag/hash and docs-version.')
+  .example('$0 delete --docs-version', 'Removes a version from gh-pages.')
+  .example('$0 link --docs-version --target-version', 'Creates symbolic link in the "v" directory and add a new version (docs-version) to the versions.json file.')
+  .demand(1)
+  .command('build', 'Builds a documentation version using the specified git-tag and set the title version using the specified docs-version.')
+  .command('delete', 'Removes a version.')
+  .command('link', 'Links one version to another by creating a symbolic link in the "v" directory.  Also adds version (docs-version) to the versions.json file.')
+  .option('tag', {
+    describe: 'The tag to checkout.  docs-version is not necessary if tag is provided.'
+  })
+  .option('docs-version', {
+    describe: 'The version to tag the build as.'
+  })
+  .option('target-version', {
+    describe: 'The version which the symbolic link version is pointed to.  Typically, the target-version contains the actual documentation files.',
+    default: ''
+  })
+  .option('released', {
+    describe: 'Specify if this version has been GA released.  If set to true, the version is used in determining the latest version.  Should never set a Beta or RC version to true.',
+    type: 'boolean',
+    default: false
+  })
+  .option('init', {
+    describe: 'Set to true if you want to build specified version into an empty content.  If false, new version is added to existing gh-pages branch contents.',
+    type: 'boolean',
+    default: false
+  })
+  .option('deploy', {
+    describe: 'Pushes the gh-pages contents to Github.',
+    type: 'boolean',
+    default: false
+  })
+  .count('v')
+  .alias('v', 'verbose')
+  .help('h')
+  .alias('h', 'help')
+  .argv;
+
+var tempDir = './site';
+var customDir = tempDir + '/.custom';
+var versionDir = tempDir + '/v/' + argv.docsVersion;
+var latestVersion;
+
+function log() {
+  if (argv.v && arguments[0]) {
+    arguments[0] = '>>> ' + arguments[0];
+    console.log.apply(console, arguments);
+  }
+}
+
+/*
+ * Create temp directory where builds are copied to
+ */
+function initTempDirectory() {
+  var statement = 'mkdir -p ' + tempDir + ' ; rm -rf ' + tempDir + '/*';
+  log('initializing temp directory, statement:', statement);
+  execSync(statement);
+}
+
+/*
+ * Copy custom files to temp directory so we can use to inject into tag/branch/hash
+ * where files in this custom directory may not exist
+ */
+function copyCustomDirectoryToTempDir() {
+  var statement = 'mkdir -p ' + customDir + ' ; cp -r docs/custom/* ' + customDir;
+  log('copying custom directory, statement:', statement);
+  execSync(statement);
+}
+
+/*
+ * Run git checkout gh-pages branch
+ */
+function checkoutGhPageBranch() {
+  var statement = 'git checkout gh-pages';
+  log('checkout gh-pages, statement:', statement);
+  execSync(statement);
+}
+
+/*
+ * Copy existing contents from gh-pages branch to temp directory
+ */
+function copyGhPagesContentsToTempDir() {
+  var statement;
+
+  if (!argv.init) {
+    // we want to create new build into existing gh-page contents
+
+    // checkout gh-pages
+    checkoutGhPageBranch();
+
+    // copy files to temp directory
+    statement = 'rsync -av --exclude="\\..*" --exclude="node_modules/*" --exclude="site" . ' + tempDir;
+    log('copying contents to temp dir, statement:', statement);
+    execSync(statement);
+
+    checkoutPrevBranch();
+  }
+
+  // create "v" directory if not exist
+  statement = 'mkdir -p ' + tempDir + '/v';
+  log('create "v" directory, statement:', statement);
+  execSync(statement);
+}
+
+/*
+ * Checkout hash or tag to be built
+ */
+function checkoutGitTag() {
+  var statement = 'git checkout ' + argv.gitTag;
+  log('run git checkout, statement:', statement);
+  execSync(statement);
+}
+
+/*
+ * Copy custom directory from temp directory to the branch we 
+ * are building
+ */
+function injectCustomDirectory() {
+  var statement = 'mkdir -p docs/custom ; cp -r ' + customDir + '/* docs/custom';
+  log('injecting custom directory, statement:', statement);
+  execSync(statement);
+}
+
+/*
+ * Inject custom-loader.js into the mkdocs.yml file in the
+ * branch we are building
+ */
+function injectCustomLoaderJs() {
+  // set file name
+  var file = 'mkdocs.yml';
+  log('adding custom-loader.js to mkdocs file:', file);
+
+  // read file mkdocs.yml
+  var mkdocsContent = fs.readFileSync(file, 'utf-8');
+
+  // inject custom/custom-loader.js if necessary
+  var ary = mkdocsContent.split('extra_javascript: ');
+  if (ary.length === 1) {
+    // there's no extra_javascript in the file, append it
+    log('mkdodcs.yml does not have an "extra_javascript" line');
+    mkdocsContent += '\nextra_javascript: [\'custom/custom-loader.js\']';
+  } else {
+    // mkdocs contains the extra_javascript property, see if we need to insert custom-loader.js
+    log('found "extra_javascript" line in mkdocs.yml');
+    var subary = ary[1].split('\n');
+    var extraJavascript = JSON.parse(subary[0].replace(/\'/g, '"'));
+    if (extraJavascript.indexOf('custom/custom-loader.js') === -1) {
+      log('adding custom/custom-loader.js to extra_javascript');
+      extraJavascript.push('custom/custom-loader.js');
+      subary[0] = JSON.stringify(extraJavascript);
+    }
+    ary[1] = subary.join('\n');
+    mkdocsContent = ary.join('extra_javascript: ');
+  }
+
+  fs.writeFileSync(file, mkdocsContent);
+}
+
+/*
+ * Run the mkdocs build command, make sure we build the new contents into the version directory
+ */
+function runMkdocsBuildCommand() {
+  var statement = 'mkdocs build -c -d ' + versionDir;
+  log('Executing mkdocs build, statement:', statement);
+  execSync(statement);
+}
+
+/*
+ * Update versions.json in temp directory
+ * mode can be 'add' or 'delete'
+ * If mode is 'add', then we are adding a version to the file.
+ * If mode is 'delete', then we are remove a version from the file.
+ * We also sort the file to be descending order using the version property.
+ */
+function updateVersionsJson(mode, file) {
+  file = file || tempDir + '/versions.json';
+  log('Updating version file:', file);
+
+
+  var content;
+
+  if (fs.existsSync(file)) {
+    // file exists, read it
+    content = fs.readFileSync(file, 'utf-8');
+  } else {
+    // file does not exist, set to empty array
+    content = '[]';
+  }
+
+  var json = JSON.parse(content);
+  var idx = _.findIndex(json, function(row) {
+    return (row.version === argv.docsVersion);
+  });
+  log('idx is', idx);
+  switch(mode) {
+    case 'add':
+      if (idx === -1) {
+        // version not in array, and we want to add it
+        var row = {
+          aliases: [],
+          version: argv.docsVersion,
+          title: argv.docsVersion,
+          gitTag: argv.gitTag,
+          released: argv.released
+        };
+        log('adding version row:', row);
+        json.push(row);
+      } else {
+        // version already in array, set property
+        json[idx].gitTag = argv.gitTag;
+        json[idx].released = argv.released;
+      }
+      break;
+    case 'link':
+      var targetIdx = _.findIndex(json, function(row) {
+        return (row.version === argv.targetVersion);
+      });
+      if (targetIdx === -1) {
+        // cannot find a target version to link to
+        // throw exception
+        throw new Error('Cannot find target-version in versions.json file.');
+      }
+
+      if (idx === -1) {
+        // version not in array, and we want to add it
+        var row = {
+          aliases: [],
+          version: argv.docsVersion,
+          title: argv.docsVersion,
+          gitTag: argv.gitTag,
+          released: argv.released,
+          link: true
+        };
+        log('adding version row:', row);
+        json.push(row);
+      } else {
+        // version already in array, set property
+        json[idx].gitTag = json[targetIdx].gitTag;
+        json[idx].released = argv.released;
+        json[idx].link = true;
+      }
+      break;
+    case 'delete':
+      if (idx > -1) {
+        // version is in array and we want to remove it
+        log('removing row', idx);
+        json.splice(idx, 1);
+      }
+      break;
+  }
+
+  // sort list for descending order
+  json.sort(function(rowA, rowB) {
+    return -semverCompare(rowA.version, rowB.version);
+  });
+
+  // save latest version for later use
+  for(var i = 0; i < json.length; i++) {
+    if (json[i].released) {
+      latestVersion = json[i].version;
+      break;
+    }
+  }
+  log('latestVersion is ' + latestVersion);
+
+  log('json', json);
+  log('saving versions json to ' + file);
+  fs.writeFileSync(file, JSON.stringify(json));
+}
+
+/*
+ * Copy latest version content to the root directory of temp directory
+ */
+function copyLatestVersionToRoot() {
+  if (latestVersion) {
+    var statement = 'cp -r ' + tempDir + '/v/' + latestVersion + '/* ' + tempDir;
+    log('copying latest version to root, statement:', statement);
+    execSync(statement);
+  }
+}
+
+/*
+ * Add changes and commit to gh-pages branch
+ */
+function commitGhPageBranch() {
+  // need to create an .gitignore file to site some items
+  var file = '.gitignore';
+  var content = 'site/\nnode_modules/\n.idea\n*.iml\n.DS_Store';
+  log('creating gitignore file:', file);
+  log('content:', content);
+  fs.writeFileSync(file, content);
+
+  // add files to branch
+  var statement = 'git add .';
+  log('run git add, statement:', statement);
+  execSync(statement);
+
+  // commit with message
+  statement = 'git commit -m "saving build v' + argv.docsVersion + '"';
+  log('run git commit, statement:', statement);
+  execSync(statement);
+}
+
+/*
+ * Copy contents from temp directory to gh-pages branch
+ */
+function copyContentsToGhPages() {
+  // write script file to clean current gh-pages directory
+  var file = tempDir + '/.cleaner';
+  var content = 'shopt -s extglob\nrm -rf ./!(node_modules|site)';
+  log('creating cleaner, file:', file);
+  log('content:', content);
+  fs.writeFileSync(file, content);
+
+  // checkout branch
+  checkoutGhPageBranch();
+
+  // remove all files
+  var statement = '/bin/bash ' + file;
+  log('executing cleaner script, statement:', statement);
+  execSync(statement);
+
+  // copy files from temp directory to branch
+  statement = 'cp -r ' + tempDir + '/* .';
+  log('copying files from temp directory, statement:', statement);
+  execSync(statement);
+
+  // commit to branch
+  commitGhPageBranch();
+}
+
+/*
+ * Clean changed and untracked files in current branch
+ */
+function cleanGitBranch() {
+  var statement = 'git checkout . ; git clean -f -d';
+  log('clean branch, statement:', statement);
+  execSync(statement);
+}
+
+/*
+ * Checkout previous branch
+ */
+function checkoutPrevBranch() {
+  var statement = 'git checkout -';
+  log('checkout previous branch, statement:', statement);
+  execSync(statement);
+}
+
+/*
+ * Create symbolic link from new version to orig version
+ */
+function createSymbolicLink() {
+  var statement = 'ln -sf v/' + argv.targetVersion + ' v/' + argv.docsVersion;
+  log('creating symbolic link, statement:', statement);
+  execSync(statement);
+}
+
+/*
+ * Remove version directory from "v" directory inside the temp directory
+ */
+function removeVersionDirectory() {
+  var statement = 'rm -rf ' + versionDir;
+  log('Removing existing version directory, statement:', statement);
+  execSync(statement);
+}
+
+/*
+ * Build a version
+ */
+function build() {
+  initTempDirectory();
+  copyCustomDirectoryToTempDir();
+  copyGhPagesContentsToTempDir();
+  checkoutGitTag()
+  injectCustomDirectory();
+  injectCustomLoaderJs();
+  runMkdocsBuildCommand();
+  updateVersionsJson('add');
+  cleanGitBranch();
+  checkoutPrevBranch();
+  copyLatestVersionToRoot();
+  copyContentsToGhPages();
+  checkoutPrevBranch();
+}
+
+/*
+ * remove a version
+
+ */
+function delele() {
+  initTempDirectory();
+  copyGhPagesContentsToTempDir();
+  removeVersionDirectory();
+  updateVersionsJson('delete');
+  copyLatestVersionToRoot();
+  copyContentsToGhPages();
+  checkoutPrevBranch();
+}
+
+/*
+ * creates a symbolic link from one version to another
+ */
+function link() {
+  checkoutGhPageBranch();
+  createSymbolicLink();
+  updateVersionsJson('link', 'versions.json');
+  commitGhPageBranch();
+  checkoutPrevBranch();
+}
+
+log('command:', argv._[0]);
+log('gitTag:', argv.gitTag);
+log('docs-version:', argv.docsVersion);
+log('tempDir:', tempDir);
+log('customDir:', customDir);
+log('versionDir:', versionDir);
+
+switch(argv._[0]) {
+  case 'build':
+    build();
+    break;
+  case 'delete':
+    delele();
+    break;
+  case 'link':
+    link();
+    break;
+}
