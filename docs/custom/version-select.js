@@ -25,7 +25,7 @@ function initializeVersionSelection() {
   var REL_BASE_URL = (typeof base_url === 'undefined' ? '.' : base_url);
   var ABS_BASE_URL = normalizePath(window.location.pathname + "/" +
                                    REL_BASE_URL);
-  var CURRENT_VERSION = (ABS_BASE_URL.match(/^(\/v\/)([0-9]*\.[0-9]*\.[0-9]*|[0-9]*\.[0-9]*\.[0-9]*-rc[0-9]*|[0-9]*\.[0-9]*\.[0-9]*-beta|[0-9]*\.[0-9]*\.[0-9]*-alpha)(\/)/i) || [])[2] || '';
+  var CURRENT_VERSION = (ABS_BASE_URL.match(/^(\/v\/)([A-Za-z0-9\.\-_]+)(\/)/i) || [])[2] || '';
 
   function makeSelect(options, selected) {
     var select = document.createElement("select");
