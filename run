@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import { exec } from 'child_process';
+
 'use strict';
 
 var fs = require('fs');
@@ -34,8 +36,8 @@ var argv = yargs
     type: 'boolean',
     default: true
   })
-  .option('init', {
-    describe: 'Set to true if you want to build specified version into an empty content.  If false, new version is added to existing gh-pages branch contents.',
+  .option('init-from-gh-pages', {
+    describe: 'Set to true if you want to build specified version starting from gh-pages branch contents.  If false, new version is created into current site folder.',
     type: 'boolean',
     default: false
   })
@@ -71,7 +73,7 @@ function log() {
  * Create temp directory where builds are copied to
  */
 function initTempDirectory() {
-  var statement = 'mkdir -p ' + tempDir + ' ; rm -rf ' + tempDir + '/*';
+  var statement = 'mkdir -p ' + tempDir;
   log('initializing temp directory, statement:', statement);
   execSync(statement);
 }
@@ -99,21 +101,21 @@ function checkoutGhPageBranch() {
  * Copy existing contents from gh-pages branch to temp directory
  */
 function copyGhPagesContentsToTempDir() {
-  var statement;
+  // we want to create new build into existing gh-page contents,
+  // let's clean the tempDir before we copy files to it.
+  var statement = 'rm -rf ' + tempDir + '/*';
+  log('Removing files from temp directory, statement:', statement);
+  execSync(statement);
 
-  if (!argv.init) {
-    // we want to create new build into existing gh-page contents
+  // checkout gh-pages
+  checkoutGhPageBranch();
 
-    // checkout gh-pages
-    checkoutGhPageBranch();
+  // copy files to temp directory
+  statement = 'rsync -av --exclude="\\..*" --exclude="node_modules/*" --exclude="site" . ' + tempDir;
+  log('copying contents to temp dir, statement:', statement);
+  execSync(statement);
 
-    // copy files to temp directory
-    statement = 'rsync -av --exclude="\\..*" --exclude="node_modules/*" --exclude="site" . ' + tempDir;
-    log('copying contents to temp dir, statement:', statement);
-    execSync(statement);
-
-    checkoutPrevBranch();
-  }
+  checkoutPrevBranch();
 
   // create "v" directory if not exist
   statement = 'mkdir -p ' + tempDir + '/v';
@@ -398,7 +400,10 @@ function removeVersionDirectory() {
 function build() {
   initTempDirectory();
   copyCustomDirectoryToTempDir();
-  copyGhPagesContentsToTempDir();
+  
+  if (argv.initFromGhPages) {
+    copyGhPagesContentsToTempDir();
+  }
   checkoutGitTag()
   injectCustomDirectory();
   injectCustomLoaderJs();
@@ -420,7 +425,9 @@ function build() {
 function deleteVersion() {
   initTempDirectory();
   copyCustomDirectoryToTempDir();
-  copyGhPagesContentsToTempDir();
+  if (argv.initFromGhPages) {
+    copyGhPagesContentsToTempDir();
+  }
   removeVersionDirectory();
   updateVersionsJson('delete');
   copyLatestVersionToRoot();
@@ -436,7 +443,9 @@ function deleteVersion() {
 function link() {
   initTempDirectory();
   copyCustomDirectoryToTempDir();
-  copyGhPagesContentsToTempDir();
+  if (argv.initFromGhPages) {
+    copyGhPagesContentsToTempDir();
+  }
   createSymbolicLink();
   updateVersionsJson('link');
   copyLatestVersionToRoot();
