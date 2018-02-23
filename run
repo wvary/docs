@@ -32,7 +32,7 @@ var argv = yargs
   .option('released', {
     describe: 'Specify if this version has been GA released.  If set to true, the version is used in determining the latest version.  Should never set a Beta or RC version to true.',
     type: 'boolean',
-    default: false
+    default: true
   })
   .option('init', {
     describe: 'Set to true if you want to build specified version into an empty content.  If false, new version is added to existing gh-pages branch contents.',
