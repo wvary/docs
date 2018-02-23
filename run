@@ -380,7 +380,7 @@ function checkoutPrevBranch() {
 function createSymbolicLink() {
   var statement = 'cd ' + tempDir + '/v ; unlink ' + argv.docsVersion + ' ; ln -sf ' + argv.targetVersion + ' ' + argv.docsVersion + ' ; cd -';
   log('creating symbolic link, statement:', statement);
-  // execSync(statement);
+  execSync(statement);
 }
 
 /*
