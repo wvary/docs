@@ -402,13 +402,12 @@ function build() {
  * remove a version
 
  */
-function delele() {
-  initTempDirectory();
-  copyGhPagesContentsToTempDir();
+function delete() {
+  checkoutGhPageBranch();
   removeVersionDirectory();
-  updateVersionsJson('delete');
-  copyLatestVersionToRoot();
-  copyContentsToGhPages();
+  updateVersionsJson('delete', 'versions.json');
+  // copyLatestVersionToRoot();
+  commitGhPageBranch();
   checkoutPrevBranch();
 }
 
@@ -435,7 +434,7 @@ switch(argv._[0]) {
     build();
     break;
   case 'delete':
-    delele();
+    delete();
     break;
   case 'link':
     link();
