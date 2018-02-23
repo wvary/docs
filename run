@@ -4,7 +4,6 @@
 
 var fs = require('fs');
 var execSync = require('child_process').execSync;
-var spawnSync = require('child_process').spawnSync;
 var _ = require('lodash');
 var semverCompare = require('semver-compare');
 var yargs = require('yargs');
@@ -13,7 +12,8 @@ var argv = yargs
   .usage('Usage: $0 <command> [options]')
   .example('$0 build --git-tag=3.10.0 --docs-version=3.10.0 --released=true', 'Builds the mkdocs project using the tag/hash and docs-version.')
   .example('$0 build --git-tag=7c6200265787f548eb2ba4db392833791b518310 --docs-version=3.8.1', 'Builds the mkdocs project using the tag/hash and docs-version.')
-  .example('$0 delete --docs-version', 'Removes a version from gh-pages.')
+  .example('$0 delete --docs-version', 'Removes specified version.  Throw error if specified version is linked by other versions.')
+  .example('$0 delete --docs-version --delete-links', 'Removes specified version.  Also removes all verions linked to specified version as well.')
   .example('$0 link --docs-version --target-version', 'Creates symbolic link in the "v" directory and add a new version (docs-version) to the versions.json file.')
   .demand(1)
   .command('build', 'Builds a documentation version using the specified git-tag and makes contents available for testing in site folder.')
@@ -33,6 +33,11 @@ var argv = yargs
     describe: 'Specify if this version has been GA released.  If set to true, the version is used in determining the latest version.  Should never set a Beta or RC version to true.',
     type: 'boolean',
     default: true
+  })
+  .option('delete-links', {
+    describe: 'Set to true to force the delete command to also remove all versions linked to specified version.',
+    type: 'boolean',
+    default: false
   })
   .option('init-from-gh-pages', {
     describe: 'Set to true if you want to build specified version starting from gh-pages branch contents.  If false, new version is created into current site folder.',
@@ -191,8 +196,10 @@ function runMkdocsBuildCommand() {
  * If mode is 'delete', then we are remove a version from the file.
  * We also sort the file to be descending order using the version property.
  */
-function updateVersionsJson(mode, file) {
-  file = file || tempDir + '/versions.json';
+function updateVersionsJson(mode, version) {
+  version = version || argv.docsVersion;
+
+  var file = tempDir + '/versions.json';
   log('Updating version file:', file);
 
 
@@ -208,7 +215,7 @@ function updateVersionsJson(mode, file) {
 
   var json = JSON.parse(content);
   var idx = _.findIndex(json, function(row) {
-    return (row.version === argv.docsVersion);
+    return (row.version === version);
   });
   log('idx is', idx);
   switch(mode) {
@@ -217,8 +224,8 @@ function updateVersionsJson(mode, file) {
         // version not in array, and we want to add it
         var row = {
           aliases: [],
-          version: argv.docsVersion,
-          title: argv.docsVersion,
+          version: version,
+          title: version,
           gitTag: argv.gitTag,
           released: argv.released
         };
@@ -244,9 +251,10 @@ function updateVersionsJson(mode, file) {
         // version not in array, and we want to add it
         var row = {
           aliases: [],
-          version: argv.docsVersion,
-          title: argv.docsVersion,
-          gitTag: argv.gitTag,
+          version: version,
+          title: version,
+          gitTag: json[targetIdx].gitTag,
+          targetVersion: json[targetIdx].version,
           released: argv.released,
           link: true
         };
@@ -282,7 +290,7 @@ function updateVersionsJson(mode, file) {
   }
   log('latestVersion is ' + latestVersion);
 
-  log('json', json);
+  // log('json', json);
   log('saving versions json to ' + file);
   fs.writeFileSync(file, JSON.stringify(json));
 }
@@ -296,6 +304,16 @@ function copyLatestVersionToRoot() {
     log('copying latest version to root, statement:', statement);
     execSync(statement);
   }
+}
+
+/*
+ * Copy custom directory to custom directory of temp directory
+ * This way, the root custom directory always has the latest custom codes
+ */
+function copyCustomDirectoryToRoot() {
+  var statement = 'cp ' + tempDir + '/.custom/* ' + tempDir + '/custom';
+  log('copying latest custom codes to root custom directory, statement:', statement);
+  execSync(statement);  
 }
 
 /*
@@ -380,14 +398,62 @@ function checkoutPrevBranch() {
 function createSymbolicLink() {
   var statement = 'cd ' + tempDir + '/v ; unlink ' + argv.docsVersion + ' ; ln -sf ' + argv.targetVersion + ' ' + argv.docsVersion + ' ; cd -';
   log('creating symbolic link, statement:', statement);
-  execSync(statement);
+  // execSync(statement);
+}
+
+/*
+ * Get all versions linked to version being deleted
+ * Throw error if version to be deleted is a targeted symlink for other versions
+ * and there are linked versions but --delete-links aren't set to true.
+ */
+function getLinkedVersion() {
+  var file = tempDir + '/versions.json';
+  log('reading version file:', file);
+  var content = fs.readFileSync(file, 'utf-8');
+  log('content:', content);
+
+  var json = JSON.parse(content);
+
+  var target = _.find(json, function(row) {
+    return row.version === argv.docsVersion;
+  });
+  log('target:', target);
+
+  if (!target) {
+    throw new Error('Version to be deleted does not exist in versions.json file.');
+  }
+
+  var links = [];
+
+  if (!target.link) {
+    // this version is not a symbolic link version
+    links = _.filter(json, function(row) {
+      return row.targetVersion === target.version;
+    });
+    log('links:', links);
+
+    if (links.length && !argv.deleteLinks) {
+      // there are other versions linking to this version, can't delete it
+      var msg = 'Cannot remove version because it is linked to by the following verions: ' +
+        _.map(links, function(row) {
+          return row.version;
+        }).join(', ');
+      msg += '\nYou can rerun the delete command with the --delete-links option to also remove all versions linked to this.';
+      throw new Error(msg);
+    }
+  }
+
+  // got here means we can remove the version
+  return _.map(links, function(row) {
+    return row.version;
+  });
 }
 
 /*
  * Remove version directory from "v" directory inside the temp directory
  */
-function removeVersionDirectory() {
-  var statement = 'rm -rf ' + versionDir;
+function removeVersionDirectory(version) {
+  var statement = 'rm -rf ' + tempDir + '/v/' + version;
   log('Removing existing version directory, statement:', statement);
   execSync(statement);
 }
@@ -402,6 +468,7 @@ function build() {
   if (argv.initFromGhPages) {
     copyGhPagesContentsToTempDir();
   }
+
   checkoutGitTag()
   injectCustomDirectory();
   injectCustomLoaderJs();
@@ -410,6 +477,7 @@ function build() {
   cleanGitBranch();
   checkoutPrevBranch();
   copyLatestVersionToRoot();
+  copyCustomDirectoryToRoot();
 
   if (argv.deploy) {
     deployContentsToGhPages();
@@ -423,12 +491,22 @@ function build() {
 function deleteVersion() {
   initTempDirectory();
   copyCustomDirectoryToTempDir();
+
   if (argv.initFromGhPages) {
     copyGhPagesContentsToTempDir();
   }
-  removeVersionDirectory();
-  updateVersionsJson('delete');
+
+  var linkedVersions = getLinkedVersion();
+  linkedVersions.push(argv.docsVersion);
+  log('these versions will be deleted:', linkedVersions);
+  _.each(linkedVersions, function(version) {
+    latestVersion = undefined;
+    removeVersionDirectory(version);
+    updateVersionsJson('delete', version);
+  });
+
   copyLatestVersionToRoot();
+  copyCustomDirectoryToRoot();
 
   if (argv.deploy) {
     deployContentsToGhPages();
@@ -441,12 +519,14 @@ function deleteVersion() {
 function link() {
   initTempDirectory();
   copyCustomDirectoryToTempDir();
+
   if (argv.initFromGhPages) {
     copyGhPagesContentsToTempDir();
   }
   createSymbolicLink();
   updateVersionsJson('link');
   copyLatestVersionToRoot();
+  copyCustomDirectoryToRoot();
 
   if (argv.deploy) {
     deployContentsToGhPages();
