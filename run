@@ -16,7 +16,7 @@ var argv = yargs
   .example('$0 delete --docs-version', 'Removes a version from gh-pages.')
   .example('$0 link --docs-version --target-version', 'Creates symbolic link in the "v" directory and add a new version (docs-version) to the versions.json file.')
   .demand(1)
-  .command('build', 'Builds a documentation version using the specified git-tag and set the title version using the specified docs-version.')
+  .command('build', 'Builds a documentation version using the specified git-tag and makes contents available for testing in site folder.')
   .command('delete', 'Removes a version.  Note: Delete does not handle linked versions correctly.')
   .command('link', 'Links one version to another by creating a symbolic link in the "v" directory.  Also adds version (docs-version) to the versions.json file.')
   .option('tag', {
@@ -40,9 +40,14 @@ var argv = yargs
     default: false
   })
   .option('deploy', {
-    describe: 'Pushes the gh-pages contents to Github.',
+    describe: 'Commit changes to gh-pages branch and push the gh-pages branch to Github.',
     type: 'boolean',
     default: false
+  })
+  .option('git-remote', {
+    describe: 'Remote to use when pushing/pulling branches to/from Github.  Default value is "origin".',
+    type: 'string',
+    default: 'origin'
   })
   .count('v')
   .alias('v', 'verbose')
@@ -318,7 +323,7 @@ function commitGhPageBranch() {
 /*
  * Copy contents from temp directory to gh-pages branch
  */
-function copyContentsToGhPages() {
+function deployContentsToGhPages() {
   // write script file to clean current gh-pages directory
   var file = tempDir + '/.cleaner';
   var content = 'shopt -s extglob\nrm -rf ./!(node_modules|site)';
@@ -341,6 +346,14 @@ function copyContentsToGhPages() {
 
   // commit to branch
   commitGhPageBranch();
+
+  // push to Github
+  statement = 'git push ' + argv.gitRemote + ' gh-pages';
+  log('pushing gh-pages branch to Github, statement:', statement);
+  execSync(statement);
+
+
+  checkoutPrevBranch();
 }
 
 /*
@@ -394,8 +407,10 @@ function build() {
   cleanGitBranch();
   checkoutPrevBranch();
   copyLatestVersionToRoot();
-  copyContentsToGhPages();
-  checkoutPrevBranch();
+
+  if (argv.deploy) {
+    deployContentsToGhPages();
+  }
 }
 
 /*
@@ -403,23 +418,32 @@ function build() {
 
  */
 function deleteVersion() {
-  checkoutGhPageBranch();
+  initTempDirectory();
+  copyCustomDirectoryToTempDir();
+  copyGhPagesContentsToTempDir();
   removeVersionDirectory();
-  updateVersionsJson('delete', 'versions.json');
-  // copyLatestVersionToRoot();
-  commitGhPageBranch();
-  checkoutPrevBranch();
+  updateVersionsJson('delete');
+  copyLatestVersionToRoot();
+
+  if (argv.deploy) {
+    deployContentsToGhPages();
+  }
 }
 
 /*
  * creates a symbolic link from one version to another
  */
 function link() {
-  checkoutGhPageBranch();
+  initTempDirectory();
+  copyCustomDirectoryToTempDir();
+  copyGhPagesContentsToTempDir();
   createSymbolicLink();
-  updateVersionsJson('link', 'versions.json');
-  commitGhPageBranch();
-  checkoutPrevBranch();
+  updateVersionsJson('link');
+  copyLatestVersionToRoot();
+
+  if (argv.deploy) {
+    deployContentsToGhPages();
+  }
 }
 
 log('command:', argv._[0]);
