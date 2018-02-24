@@ -253,6 +253,7 @@ function updateVersionsJson(mode, version) {
       } else {
         // version already in array, set property
         json[idx].gitTag = json[targetIdx].gitTag;
+        json[idx].targetVersion = json[targetIdx].version;
         json[idx].released = argv.released;
         json[idx].link = true;
       }
