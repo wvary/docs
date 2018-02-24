@@ -225,6 +225,15 @@ function updateVersionsJson(mode, version) {
         // version already in array, set property
         json[idx].gitTag = argv.gitTag;
         json[idx].released = argv.released;
+        delete json[idx].link;
+        delete json[idx].targetVersion;
+
+        // update linked versions to have this gitTag if rebuilding existing version
+        _.each(json, function(row) {
+          if (row.targetVersion === json[idx].version) {
+            row.gitTag = json[idx].gitTag;
+          }
+        });
       }
       break;
     case 'link':
