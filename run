@@ -473,6 +473,11 @@ function deleteVersion() {
  * creates a symbolic link from one version to another
  */
 function link() {
+  if (argv.docsVersion === argv.targetVersion) {
+    // docs-version and target-verion cannot be the same
+    throw new Error('Cannot link docs-version to itself.')
+  }
+
   initBuildDir();
   copyCustomDirToBuildDir();
 
