@@ -174,7 +174,11 @@ function injectCustomTheme() {
  * Run the mkdocs build command, make sure we build the new contents into the version directory
  */
 function runMkdocsBuildCommand() {
-  var cmd = 'mkdocs build -c -d ' + versionDir;
+  var cmd = 'rm -rf ' + versionDir;
+  log('removing version directory before running build in case it is a symbolic link:', cmd);
+  execSync(cmd);
+
+  cmd = 'mkdocs build -c -d ' + versionDir;
   log('Executing mkdocs build:', cmd);
   execSync(cmd);
 }
